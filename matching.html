@@ -1,0 +1,450 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>חיבור קווים - Match the Words!</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#4A90D9">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Rubik:wght@400;600;700&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#4A90D9;--primary-light:#7BB3E0;--primary-dark:#2E6BAD;
+            --accent:#FF6B9D;--success:#4CD964;--warning:#FFCC02;--orange:#FF9500;
+            --coin:#FFD700;--coin-dark:#DAA520;
+            --bg-main:#F0F4FF;
+            --shadow-sm:0 2px 8px rgba(74,144,217,0.08);
+            --shadow-md:0 8px 24px rgba(74,144,217,0.12);
+            --radius:24px;--radius-sm:16px;
+        }
+        body{
+            font-family:'Rubik',sans-serif;background:linear-gradient(135deg,#E8F4FD 0%,#F0E6FF 50%,#FFF0F5 100%);
+            min-height:100vh;padding:12px;user-select:none;
+            padding-bottom:80px;
+        }
+
+        /* Header bar */
+        .app-header{
+            display:flex;align-items:center;justify-content:space-between;
+            background:white;border-radius:var(--radius);padding:12px 16px;
+            box-shadow:var(--shadow-sm);margin-bottom:12px;max-width:500px;margin-left:auto;margin-right:auto;
+        }
+        .app-header-left{display:flex;align-items:center;gap:10px}
+        .app-header-mascot{width:38px;height:38px;background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3em}
+        .app-header-name{font-family:'Fredoka One',cursive;font-size:0.95em;color:var(--primary-dark)}
+        .app-header-right{display:flex;align-items:center;gap:8px}
+        .header-coins{display:flex;align-items:center;gap:3px;background:linear-gradient(135deg,#FFF8E1,#FFFDE7);padding:5px 10px;border-radius:16px;border:2px solid #FFE082;font-family:'Fredoka One',cursive;font-size:0.8em;color:var(--coin-dark)}
+
+        /* Game title bar */
+        .game-title-bar{
+            display:flex;align-items:center;justify-content:space-between;
+            max-width:500px;margin:0 auto 10px;flex-wrap:wrap;gap:8px;
+        }
+        .game-title-bar h1{font-family:'Fredoka One',cursive;font-size:1.4em;color:var(--primary-dark)}
+        .game-title-btns{display:flex;gap:6px;align-items:center}
+        .btn{
+            background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;
+            border:none;border-radius:12px;padding:8px 14px;
+            font-family:'Fredoka One',cursive;font-size:0.8em;
+            cursor:pointer;transition:all 0.2s;box-shadow:0 3px 8px rgba(74,144,217,0.3);
+        }
+        .btn:active{transform:scale(0.95)}
+        .btn.green{background:linear-gradient(135deg,var(--success),#66D97A);box-shadow:0 3px 8px rgba(76,217,100,0.3)}
+        .btn.orange{background:linear-gradient(135deg,var(--orange),#FFB347);box-shadow:0 3px 8px rgba(255,149,0,0.3)}
+        .score-display{font-family:'Fredoka One',cursive;font-size:1em;color:var(--primary);background:#F0F4FF;padding:5px 12px;border-radius:10px}
+        .back-btn{
+            display:inline-flex;align-items:center;gap:4px;
+            background:linear-gradient(135deg,var(--primary),var(--primary-light));
+            color:white;padding:8px 14px;border-radius:12px;
+            font-family:'Fredoka One',cursive;font-size:0.8em;
+            text-decoration:none;transition:all 0.2s;box-shadow:0 3px 8px rgba(74,144,217,0.3);
+        }
+        .back-btn:active{transform:scale(0.95)}
+
+        /* Category bar */
+        .category-bar{
+            display:flex;gap:6px;flex-wrap:wrap;justify-content:center;
+            max-width:500px;margin:0 auto 10px;
+        }
+        .cat-btn{
+            background:white;border:2px solid #E8F0FE;border-radius:16px;
+            padding:6px 12px;font-size:0.75em;cursor:pointer;transition:all 0.2s;
+            font-weight:600;color:#555;
+        }
+        .cat-btn:active{transform:scale(0.95)}
+        .cat-btn.active{background:var(--primary);color:white;border-color:var(--primary);box-shadow:0 2px 8px rgba(74,144,217,0.3)}
+
+        /* Game container */
+        .game-container{
+            max-width:500px;margin:0 auto;position:relative;
+            background:white;border-radius:var(--radius);padding:16px;
+            box-shadow:var(--shadow-md);
+        }
+        .columns{display:flex;justify-content:space-between;position:relative}
+        .column{display:flex;flex-direction:column;gap:6px;width:44%}
+
+        /* Items */
+        .item{
+            background:#F8FAFF;border-radius:12px;padding:10px 8px;
+            text-align:center;cursor:pointer;transition:all 0.2s;
+            box-shadow:var(--shadow-sm);border:2px solid #EEF2FF;
+            min-height:48px;display:flex;align-items:center;justify-content:center;
+        }
+        .item:active{transform:scale(0.96)}
+        .item.selected{border-color:var(--orange);background:#FFF8F0;box-shadow:0 0 10px rgba(255,149,0,0.2)}
+        .item.matched{border-color:var(--success);background:#F0FFF4;box-shadow:0 0 10px rgba(76,217,100,0.2);pointer-events:none}
+        .item.wrong{border-color:var(--accent);background:#FFF0F5;animation:shake 0.4s}
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+
+        .word-item{font-family:'Fredoka One',cursive;font-size:0.9em;color:var(--primary-dark)}
+        .word-item.matched{color:var(--success)}
+        .image-item{font-size:1.5em}
+
+        /* SVG lines */
+        .lines-svg{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10}
+        .match-line{stroke-width:3;fill:none;stroke-linecap:round;filter:drop-shadow(0 0 3px rgba(76,217,100,0.4))}
+
+        /* Confetti */
+        .confetti-piece{position:fixed;width:8px;height:8px;border-radius:2px;animation:confettiFall 2s forwards;pointer-events:none;z-index:999}
+        @keyframes confettiFall{0%{transform:translateY(-20px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+        /* Coin animation */
+        .coin-float{position:fixed;font-size:1.5em;z-index:9996;animation:coin-up 1s ease forwards;pointer-events:none}
+        @keyframes coin-up{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.3)}}
+
+        /* Bottom nav */
+        .bottom-nav{
+            position:fixed;bottom:0;left:0;right:0;background:white;
+            padding:8px 16px 14px;display:flex;justify-content:space-around;
+            box-shadow:0 -2px 20px rgba(0,0,0,0.06);z-index:100;border-radius:20px 20px 0 0;
+        }
+        .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 12px;border-radius:12px;transition:all 0.2s;text-decoration:none}
+        .nav-item.active{background:linear-gradient(135deg,rgba(74,144,217,0.08),rgba(74,144,217,0.04))}
+        .nav-icon{font-size:1.4em}
+        .nav-label{font-size:0.6em;color:#999;font-weight:600;font-family:'Rubik',sans-serif}
+        .nav-item.active .nav-label{color:var(--primary);font-weight:700}
+    </style>
+</head>
+<body>
+    <!-- Header with name & coins -->
+    <div class="app-header">
+        <div class="app-header-left">
+            <div class="app-header-mascot" id="matchHeaderMascot"></div>
+            <div class="app-header-name" id="headerName">שלום!</div>
+        </div>
+        <div class="app-header-right">
+            <div class="header-coins">🪙 <span id="coinsVal">0</span></div>
+        </div>
+    </div>
+
+    <!-- Game title -->
+    <div class="game-title-bar">
+        <div>
+            <h1>🔗 חיבור קווים</h1>
+        </div>
+        <div class="game-title-btns">
+            <span class="score-display" id="scoreDisplay">0 / 8</span>
+            <button class="btn orange" onclick="resetGame()">🔄</button>
+            <button class="btn green" onclick="speakAll()">🔊</button>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="category-bar" id="categoryBar"></div>
+
+    <!-- Game -->
+    <div class="game-container" id="gameContainer">
+        <svg class="lines-svg" id="linesSvg"></svg>
+        <div class="columns">
+            <div class="column" id="wordsColumn"></div>
+            <div class="column" id="imagesColumn"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <a class="nav-item" href="index.html"><span class="nav-icon">🏠</span><span class="nav-label">בית</span></a>
+        <a class="nav-item" href="index.html#letters"><span class="nav-icon">🔤</span><span class="nav-label">אותיות</span></a>
+        <a class="nav-item" href="index.html#colors"><span class="nav-icon">🎨</span><span class="nav-label">צבעים</span></a>
+        <a class="nav-item" href="index.html#animals"><span class="nav-icon">🐾</span><span class="nav-label">חיות</span></a>
+        <a class="nav-item active" href="#"><span class="nav-icon">🔗</span><span class="nav-label">חיבור</span></a>
+    </div>
+</body>
+</html>
+
+<script>
+// === LOAD PLAYER DATA ===
+const playerName = localStorage.getItem('abcKidsName') || '';
+const playerChar = localStorage.getItem('abcKidsChar') || 'panda';
+let state = JSON.parse(localStorage.getItem('abcKidsState')) || {xp:0,coins:0,level:1,streak:0,totalCorrect:0};
+
+function getCoinBonus(){
+    const equipped = localStorage.getItem('abcKidsEquipped') || '';
+    if(equipped === 'diamond') return 2; // 4 מטבעות סה"כ
+    if(equipped === 'gold') return 1;    // 3 מטבעות סה"כ
+    return 0;
+}
+
+// If no name, redirect to main page
+if(!playerName){window.location.href='index.html';}
+
+document.getElementById('headerName').innerText = playerName ? `שלום ${playerName}!` : '!שלום';
+document.getElementById('coinsVal').innerText = state.coins || 0;
+
+// Show selected character in header
+const mascotEl = document.getElementById('matchHeaderMascot');
+if(mascotEl) mascotEl.innerHTML = `<img src="char-${playerChar}.png" style="width:34px;height:34px;border-radius:50%;object-fit:cover">`;
+
+function updateHeaderCoins(){
+    state = JSON.parse(localStorage.getItem('abcKidsState')) || state;
+    document.getElementById('coinsVal').innerText = state.coins || 0;
+}
+
+function showCoinAnimation(){
+    const coin = document.createElement('div');
+    coin.className='coin-float';coin.innerText='🪙';
+    coin.style.left=Math.random()*60+20+'%';coin.style.top='40%';
+    document.body.appendChild(coin);
+    setTimeout(()=>coin.remove(),1000);
+}
+
+// === WORD BANK ===
+const wordBank = {
+    "חיות": [
+        {word:'Dog',emoji:'🐶',heb:'כלב'},{word:'Cat',emoji:'🐱',heb:'חתול'},{word:'Fish',emoji:'🐟',heb:'דג'},{word:'Bird',emoji:'🐦',heb:'ציפור'},
+        {word:'Lion',emoji:'🦁',heb:'אריה'},{word:'Bear',emoji:'🐻',heb:'דוב'},{word:'Frog',emoji:'🐸',heb:'צפרדע'},{word:'Duck',emoji:'🦆',heb:'ברווז'},
+        {word:'Horse',emoji:'🐴',heb:'סוס'},{word:'Cow',emoji:'🐄',heb:'פרה'},{word:'Pig',emoji:'🐷',heb:'חזיר'},{word:'Sheep',emoji:'🐑',heb:'כבשה'},
+        {word:'Monkey',emoji:'🐵',heb:'קוף'},{word:'Rabbit',emoji:'🐰',heb:'ארנב'},{word:'Mouse',emoji:'🐭',heb:'עכבר'},{word:'Snake',emoji:'🐍',heb:'נחש'},
+        {word:'Elephant',emoji:'🐘',heb:'פיל'},{word:'Giraffe',emoji:'🦒',heb:"ג'ירפה"},{word:'Zebra',emoji:'🦓',heb:'זברה'},{word:'Penguin',emoji:'🐧',heb:'פינגווין'},
+        {word:'Whale',emoji:'🐋',heb:'לוויתן'},{word:'Dolphin',emoji:'🐬',heb:'דולפין'},{word:'Turtle',emoji:'🐢',heb:'צב'},{word:'Butterfly',emoji:'🦋',heb:'פרפר'},
+        {word:'Fox',emoji:'🦊',heb:'שועל'},{word:'Wolf',emoji:'🐺',heb:'זאב'},{word:'Owl',emoji:'🦉',heb:'ינשוף'},{word:'Camel',emoji:'🐪',heb:'גמל'}
+    ],
+    "אוכל": [
+        {word:'Apple',emoji:'🍎',heb:'תפוח'},{word:'Banana',emoji:'🍌',heb:'בננה'},{word:'Orange',emoji:'🍊',heb:'תפוז'},{word:'Grape',emoji:'🍇',heb:'ענבים'},
+        {word:'Strawberry',emoji:'🍓',heb:'תות'},{word:'Watermelon',emoji:'🍉',heb:'אבטיח'},{word:'Pizza',emoji:'🍕',heb:'פיצה'},{word:'Burger',emoji:'🍔',heb:'המבורגר'},
+        {word:'Bread',emoji:'🍞',heb:'לחם'},{word:'Cheese',emoji:'🧀',heb:'גבינה'},{word:'Egg',emoji:'🥚',heb:'ביצה'},{word:'Cake',emoji:'🎂',heb:'עוגה'},
+        {word:'Cookie',emoji:'🍪',heb:'עוגיה'},{word:'Ice cream',emoji:'🍦',heb:'גלידה'},{word:'Chocolate',emoji:'🍫',heb:'שוקולד'},{word:'Carrot',emoji:'🥕',heb:'גזר'}
+    ],
+    "טבע": [
+        {word:'Sun',emoji:'☀️',heb:'שמש'},{word:'Moon',emoji:'🌙',heb:'ירח'},{word:'Star',emoji:'⭐',heb:'כוכב'},{word:'Cloud',emoji:'☁️',heb:'ענן'},
+        {word:'Rain',emoji:'🌧️',heb:'גשם'},{word:'Snow',emoji:'❄️',heb:'שלג'},{word:'Rainbow',emoji:'🌈',heb:'קשת'},{word:'Tree',emoji:'🌳',heb:'עץ'},
+        {word:'Flower',emoji:'🌸',heb:'פרח'},{word:'Mountain',emoji:'⛰️',heb:'הר'},{word:'Ocean',emoji:'🌊',heb:'אוקיינוס'},{word:'Fire',emoji:'🔥',heb:'אש'},
+        {word:'Water',emoji:'💧',heb:'מים'},{word:'Wind',emoji:'💨',heb:'רוח'},{word:'Earth',emoji:'🌍',heb:'כדור הארץ'},{word:'Leaf',emoji:'🍃',heb:'עלה'}
+    ],
+    "תחבורה": [
+        {word:'Car',emoji:'🚗',heb:'מכונית'},{word:'Bus',emoji:'🚌',heb:'אוטובוס'},{word:'Train',emoji:'🚂',heb:'רכבת'},{word:'Airplane',emoji:'✈️',heb:'מטוס'},
+        {word:'Bicycle',emoji:'🚲',heb:'אופניים'},{word:'Boat',emoji:'⛵',heb:'סירה'},{word:'Helicopter',emoji:'🚁',heb:'מסוק'},{word:'Rocket',emoji:'🚀',heb:'טיל'},
+        {word:'Taxi',emoji:'🚕',heb:'מונית'},{word:'Truck',emoji:'🚚',heb:'משאית'},{word:'Ambulance',emoji:'🚑',heb:'אמבולנס'},{word:'Tractor',emoji:'🚜',heb:'טרקטור'}
+    ],
+    "בית": [
+        {word:'House',emoji:'🏠',heb:'בית'},{word:'Door',emoji:'🚪',heb:'דלת'},{word:'Key',emoji:'🔑',heb:'מפתח'},{word:'Chair',emoji:'🪑',heb:'כיסא'},
+        {word:'Bed',emoji:'🛏️',heb:'מיטה'},{word:'Lamp',emoji:'💡',heb:'מנורה'},{word:'Clock',emoji:'🕐',heb:'שעון'},{word:'Phone',emoji:'📱',heb:'טלפון'},
+        {word:'Book',emoji:'📖',heb:'ספר'},{word:'Pencil',emoji:'✏️',heb:'עיפרון'},{word:'Ball',emoji:'⚽',heb:'כדור'},{word:'Gift',emoji:'🎁',heb:'מתנה'}
+    ],
+    "רגשות": [
+        {word:'Happy',emoji:'😊',heb:'שמח'},{word:'Sad',emoji:'😢',heb:'עצוב'},{word:'Angry',emoji:'😠',heb:'כועס'},{word:'Scared',emoji:'😨',heb:'מפחד'},
+        {word:'Love',emoji:'🥰',heb:'אהבה'},{word:'Sleepy',emoji:'😴',heb:'ישנוני'},{word:'Cool',emoji:'😎',heb:'מגניב'},{word:'Thinking',emoji:'🤔',heb:'חושב'},
+        {word:'Laughing',emoji:'😂',heb:'צוחק'},{word:'Surprised',emoji:'😲',heb:'מופתע'},{word:'Sick',emoji:'🤒',heb:'חולה'},{word:'Crying',emoji:'😭',heb:'בוכה'}
+    ]
+};
+
+let currentCategory = 'חיות';
+let currentPairs = [];
+let selectedWord = null;
+let selectedImage = null;
+let matches = [];
+let score = 0;
+let activeLine = null;
+const ITEMS_PER_ROUND = 6;
+
+// Build category buttons
+const catBar = document.getElementById('categoryBar');
+Object.keys(wordBank).forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'cat-btn' + (cat === currentCategory ? ' active' : '');
+    btn.innerText = cat;
+    btn.onclick = () => { currentCategory = cat; document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); resetGame(); };
+    catBar.appendChild(btn);
+});
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function resetGame(){
+    const pool = wordBank[currentCategory];
+    currentPairs = shuffle(pool).slice(0, ITEMS_PER_ROUND);
+    selectedWord = null; selectedImage = null;
+    matches = []; score = 0; colorIndex = 0;
+    document.getElementById('scoreDisplay').innerText = `0 / ${ITEMS_PER_ROUND}`;
+    document.getElementById('linesSvg').innerHTML = '';
+    render();
+}
+
+function render(){
+    const wordsCol = document.getElementById('wordsColumn');
+    const imagesCol = document.getElementById('imagesColumn');
+    wordsCol.innerHTML = ''; imagesCol.innerHTML = '';
+
+    const shuffledWords = shuffle(currentPairs);
+    const shuffledImages = shuffle(currentPairs);
+
+    shuffledWords.forEach(pair => {
+        const div = document.createElement('div');
+        div.className = 'item word-item';
+        div.id = 'word-' + pair.word.replace(/\s/g,'_');
+        div.innerText = pair.word;
+        div.dataset.word = pair.word;
+        if(matches.includes(pair.word)) div.classList.add('matched');
+        div.onclick = () => selectItem('word', pair.word, div);
+        wordsCol.appendChild(div);
+    });
+
+    shuffledImages.forEach(pair => {
+        const div = document.createElement('div');
+        div.className = 'item image-item';
+        div.id = 'img-' + pair.word.replace(/\s/g,'_');
+        div.innerHTML = `<span>${pair.emoji}</span>`;
+        div.dataset.word = pair.word;
+        if(matches.includes(pair.word)) div.classList.add('matched');
+        div.onclick = () => selectItem('image', pair.word, div);
+        imagesCol.appendChild(div);
+    });
+}
+
+function selectItem(type, word, el){
+    if(matches.includes(word)) return;
+    if(type === 'word'){
+        document.querySelectorAll('.word-item').forEach(e=>e.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedWord = word;
+        speak(word);
+        startActiveLine(el);
+    } else {
+        document.querySelectorAll('.image-item').forEach(e=>e.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedImage = word;
+        if(!selectedWord) startActiveLine(el);
+    }
+    if(selectedWord && selectedImage) tryMatch();
+}
+
+function startActiveLine(fromEl){
+    removeActiveLine();
+    const svg = document.getElementById('linesSvg');
+    const container = document.getElementById('gameContainer');
+    const rect = container.getBoundingClientRect();
+    const r = fromEl.getBoundingClientRect();
+    const x = r.left + r.width/2 - rect.left;
+    const y = r.top + r.height/2 - rect.top;
+    activeLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+    activeLine.setAttribute('x1',x);activeLine.setAttribute('y1',y);
+    activeLine.setAttribute('x2',x);activeLine.setAttribute('y2',y);
+    activeLine.setAttribute('stroke','#FF9500');
+    activeLine.setAttribute('stroke-width','3');
+    activeLine.setAttribute('stroke-dasharray','6 4');
+    activeLine.setAttribute('stroke-linecap','round');
+    svg.appendChild(activeLine);
+}
+
+function removeActiveLine(){if(activeLine){activeLine.remove();activeLine=null;}}
+
+document.addEventListener('mousemove',(e)=>{
+    if(!activeLine) return;
+    const rect = document.getElementById('gameContainer').getBoundingClientRect();
+    activeLine.setAttribute('x2',e.clientX-rect.left);
+    activeLine.setAttribute('y2',e.clientY-rect.top);
+});
+document.addEventListener('touchmove',(e)=>{
+    if(!activeLine) return;
+    const touch = e.touches[0];
+    const rect = document.getElementById('gameContainer').getBoundingClientRect();
+    activeLine.setAttribute('x2',touch.clientX-rect.left);
+    activeLine.setAttribute('y2',touch.clientY-rect.top);
+});
+
+function tryMatch(){
+    const wordEl = document.getElementById('word-'+selectedWord.replace(/\s/g,'_'));
+    const imgEl = document.getElementById('img-'+selectedImage.replace(/\s/g,'_'));
+    removeActiveLine();
+
+    if(selectedWord === selectedImage){
+        matches.push(selectedWord);
+        score++;
+        wordEl.classList.remove('selected');wordEl.classList.add('matched');
+        imgEl.classList.remove('selected');imgEl.classList.add('matched');
+        drawLine(wordEl, imgEl);
+        document.getElementById('scoreDisplay').innerText = `${score} / ${ITEMS_PER_ROUND} ⭐`;
+
+        // Update shared state - add coins
+        state.xp = (state.xp||0) + 2;
+        state.coins = (state.coins||0) + 2 + getCoinBonus();
+        state.totalCorrect = (state.totalCorrect||0) + 1;
+        state.level = Math.floor(state.xp / 20) + 1;
+        localStorage.setItem('abcKidsState', JSON.stringify(state));
+        updateHeaderCoins();
+        showCoinAnimation();
+
+        const praises = ['Great job!','Excellent!','Amazing!','Well done!','Perfect!','Awesome!'];
+        speak(praises[Math.floor(Math.random()*praises.length)]);
+
+        if(score === ITEMS_PER_ROUND){
+            state.coins += 5;
+            localStorage.setItem('abcKidsState', JSON.stringify(state));
+            updateHeaderCoins();
+            setTimeout(()=>{showConfetti();speak('Congratulations '+playerName+'!');},500);
+        }
+    } else {
+        wordEl.classList.add('wrong');imgEl.classList.add('wrong');
+        speak(['Try again!','Not quite!','Almost!','Oops!'][Math.floor(Math.random()*4)]);
+        setTimeout(()=>{wordEl.classList.remove('wrong','selected');imgEl.classList.remove('wrong','selected');},500);
+    }
+    selectedWord = null; selectedImage = null;
+}
+
+const lineColors = ['#4A90D9','#FF6B9D','#4CD964','#FFCC02','#FF9500','#A855F7','#EC407A','#2E6BAD'];
+let colorIndex = 0;
+
+function drawLine(el1, el2){
+    const svg = document.getElementById('linesSvg');
+    const container = document.getElementById('gameContainer');
+    const rect = container.getBoundingClientRect();
+    const r1 = el1.getBoundingClientRect();
+    const r2 = el2.getBoundingClientRect();
+    const x1=r1.left+r1.width/2-rect.left, y1=r1.top+r1.height/2-rect.top;
+    const x2=r2.left+r2.width/2-rect.left, y2=r2.top+r2.height/2-rect.top;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1);line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2);line.setAttribute('y2',y2);
+    line.setAttribute('class','match-line');
+    line.setAttribute('stroke',lineColors[colorIndex%lineColors.length]);
+    colorIndex++;
+    svg.appendChild(line);
+}
+
+function speak(text){
+    if('speechSynthesis' in window){
+        window.speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance(text);
+        u.lang='en-US';u.rate=0.8;u.pitch=1.1;
+        window.speechSynthesis.speak(u);
+    }
+}
+
+function speakAll(){let d=0;currentPairs.forEach(p=>{setTimeout(()=>speak(p.word),d);d+=1200;});}
+
+function showConfetti(){
+    const colors=['#4A90D9','#FF6B9D','#4CD964','#FFCC02','#FF9500','#A855F7'];
+    for(let i=0;i<50;i++){
+        const p=document.createElement('div');
+        p.className='confetti-piece';
+        p.style.left=Math.random()*100+'%';
+        p.style.background=colors[Math.floor(Math.random()*colors.length)];
+        p.style.animationDelay=Math.random()*0.5+'s';
+        document.body.appendChild(p);
+        setTimeout(()=>p.remove(),2500);
+    }
+}
+
+resetGame();
+</script>

@@ -1,0 +1,1489 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ABC Kids - למד אנגלית בכיף!</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#4A90D9">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Rubik:wght@400;600;700;900&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --primary:#4A90D9;--primary-light:#7BB3E0;--primary-dark:#2E6BAD;
+            --accent:#FF6B9D;--accent-light:#FF9DC2;
+            --success:#4CD964;--warning:#FFCC02;--orange:#FF9500;
+            --coin:#FFD700;--coin-dark:#DAA520;
+            --bg-main:#F0F4FF;--bg-card:white;
+            --shadow-sm:0 2px 8px rgba(74,144,217,0.08);
+            --shadow-md:0 8px 24px rgba(74,144,217,0.12);
+            --shadow-lg:0 16px 48px rgba(74,144,217,0.18);
+            --radius:24px;--radius-sm:16px;
+        }
+        body{font-family:'Rubik',sans-serif;background:linear-gradient(135deg,#E8F4FD 0%,#F0E6FF 50%,#FFF0F5 100%);min-height:100vh;overflow-x:hidden;padding-bottom:100px}
+
+        /* === ABC BACKGROUND === */
+        .abc-bg{position:fixed;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:0;overflow:hidden;opacity:0.25}
+        .abc-row{font-family:'Fredoka One',cursive;font-size:2.8em;line-height:1.5;flex-shrink:0;letter-spacing:0;width:100%;overflow:hidden;white-space:nowrap;margin-left:-10px}
+        .abc-row span{-webkit-text-stroke:2px rgba(0,0,0,0.15);paint-order:stroke fill;display:inline-block;animation:letter-dance 3s ease-in-out infinite;margin:0 1px}
+        @keyframes letter-dance{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+        @keyframes sway-right{0%,100%{transform:translateX(-3px)}50%{transform:translateX(3px)}}
+        @keyframes sway-left{0%,100%{transform:translateX(3px)}50%{transform:translateX(-3px)}}
+
+        /* === NAME SCREEN === */
+        .name-screen{
+            position:fixed;top:0;left:0;right:0;bottom:0;
+            background:linear-gradient(135deg,#1a0533 0%,#2d1b69 50%,#1e3a5f 100%);
+            background-image:url('bg-magic-night.png');background-size:cover;background-position:center;
+            display:flex;flex-direction:column;align-items:center;justify-content:center;
+            z-index:10000;transition:opacity 0.6s,transform 0.6s;padding:20px;
+        }
+        .name-screen.hide{opacity:0;transform:scale(1.1);pointer-events:none}
+        .name-mascot{font-size:5em;animation:mascot-bounce 1.5s ease infinite;margin-bottom:10px;position:relative}
+        .name-mascot::after{content:'💕';position:absolute;top:-10px;right:-20px;font-size:0.3em;animation:heart-float 2s ease infinite}
+        @keyframes heart-float{0%,100%{transform:translateY(0) scale(1);opacity:1}50%{transform:translateY(-15px) scale(1.2);opacity:0.6}}
+        .name-title{font-family:'Fredoka One',cursive;font-size:2.2em;color:white;text-shadow:0 3px 10px rgba(0,0,0,0.15);margin-bottom:6px}
+        .name-subtitle{color:rgba(255,255,255,0.9);font-size:1.1em;margin-bottom:30px}
+        .name-input-wrap{background:white;border-radius:20px;padding:6px;display:flex;gap:8px;width:100%;max-width:320px;box-shadow:0 8px 30px rgba(0,0,0,0.15)}
+        .name-input{flex:1;border:none;outline:none;font-family:'Fredoka One',cursive;font-size:1.2em;padding:14px 18px;border-radius:16px;color:var(--primary-dark);direction:ltr;text-align:center}
+        .name-input::placeholder{color:#ccc;font-size:0.85em}
+        .name-btn{background:linear-gradient(135deg,var(--success),#66D97A);color:white;border:none;border-radius:16px;padding:14px 24px;font-family:'Fredoka One',cursive;font-size:1.1em;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 12px rgba(76,217,100,0.4)}
+        .name-btn:hover{transform:scale(1.05)}
+        .name-btn:active{transform:scale(0.95)}
+        .name-hint{color:rgba(255,255,255,0.7);font-size:0.8em;margin-top:12px}
+
+        /* === CHARACTER SELECT === */
+        .char-screen{
+            position:fixed;top:0;left:0;right:0;bottom:0;
+            background:linear-gradient(135deg,#1a0533 0%,#2d1b69 50%,#1e3a5f 100%);
+            background-image:url('bg-magic-night.png');background-size:cover;background-position:center;
+            display:none;flex-direction:column;align-items:center;justify-content:center;
+            z-index:10001;transition:opacity 0.6s,transform 0.6s;padding:20px;
+        }
+        .char-screen.active{display:flex}
+        .char-screen.hide{opacity:0;transform:scale(1.1);pointer-events:none}
+        .char-title{font-family:'Fredoka One',cursive;font-size:1.6em;color:white;text-shadow:0 3px 10px rgba(0,0,0,0.3);margin-bottom:6px}
+        .char-subtitle{color:rgba(255,255,255,0.85);font-size:1em;margin-bottom:24px}
+        .char-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:320px}
+        .char-option{background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:3px solid rgba(255,255,255,0.3);border-radius:20px;padding:16px 10px;text-align:center;cursor:pointer;transition:all 0.3s}
+        .char-option:active{transform:scale(0.95)}
+        .char-option:hover{border-color:var(--warning);background:rgba(255,255,255,0.25)}
+        .char-option.selected{border-color:var(--warning);background:rgba(255,204,2,0.2);box-shadow:0 0 20px rgba(255,204,2,0.3)}
+        .char-option img{width:80px;height:80px;border-radius:50%;object-fit:cover;box-shadow:0 4px 15px rgba(0,0,0,0.2)}
+        .char-option-name{font-family:'Fredoka One',cursive;color:white;font-size:0.85em;margin-top:8px}
+        .char-confirm-btn{margin-top:20px;background:linear-gradient(135deg,var(--warning),#FFB347);color:#333;border:none;border-radius:16px;padding:14px 32px;font-family:'Fredoka One',cursive;font-size:1.1em;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 15px rgba(255,204,2,0.4);display:none}
+        .char-confirm-btn.show{display:block}
+        .char-confirm-btn:active{transform:scale(0.95)}
+
+        /* === SPLASH === */
+        .splash{
+            position:fixed;top:0;left:0;right:0;bottom:0;
+            background:linear-gradient(135deg,#1a0533 0%,#2d1b69 50%,#1e3a5f 100%);
+            background-image:url('bg-magic-night.png');background-size:cover;background-position:center;
+            display:none;flex-direction:column;align-items:center;justify-content:center;
+            z-index:9999;transition:opacity 0.8s,transform 0.8s;
+        }
+        .splash.active{display:flex}
+        .splash.hide{opacity:0;transform:scale(1.1);pointer-events:none}
+        .splash-mascot{width:120px;height:120px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:4em;box-shadow:0 10px 40px rgba(0,0,0,0.15);animation:mascot-bounce 1.5s ease infinite}
+        @keyframes mascot-bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-15px) scale(1.05)}}
+        .splash-title{font-family:'Fredoka One',cursive;font-size:2.5em;color:white;margin-top:20px;text-shadow:0 4px 15px rgba(0,0,0,0.15)}
+        .splash-greeting{font-family:'Fredoka One',cursive;font-size:1.4em;color:rgba(255,255,255,0.95);margin-top:10px}
+        .splash-dots{display:flex;gap:8px;margin-top:30px}
+        .splash-dots span{width:12px;height:12px;background:rgba(255,255,255,0.5);border-radius:50%;animation:dot-pulse 1.2s ease infinite}
+        .splash-dots span:nth-child(2){animation-delay:0.2s}
+        .splash-dots span:nth-child(3){animation-delay:0.4s}
+        @keyframes dot-pulse{0%,100%{transform:scale(1);background:rgba(255,255,255,0.5)}50%{transform:scale(1.4);background:white}}
+
+        /* === APP === */
+        .app{position:relative;z-index:1;max-width:480px;margin:0 auto;padding:20px 16px 110px;display:none}
+        .app.active{display:block}
+
+        /* === HEADER === */
+        .header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);border-radius:var(--radius);box-shadow:var(--shadow-sm);margin-bottom:16px}
+        .header-left{display:flex;align-items:center;gap:10px}
+        .header-mascot{width:48px;height:48px;background:linear-gradient(135deg,#FFF3E0,#FFE0B2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5em;box-shadow:0 3px 10px rgba(255,152,0,0.2);overflow:visible;position:relative}
+        .header-info{display:flex;flex-direction:column}
+        .header-name{font-family:'Fredoka One',cursive;font-size:1.05em;color:var(--primary-dark)}
+        .header-greeting{font-size:0.65em;color:#999}
+        .header-right{display:flex;align-items:center;gap:10px}
+        .header-coins{display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#FFF8E1,#FFFDE7);padding:6px 12px;border-radius:20px;border:2px solid #FFE082;font-family:'Fredoka One',cursive;font-size:0.9em;color:var(--coin-dark);transition:transform 0.2s}
+        .header-streak{display:flex;align-items:center;gap:3px;background:linear-gradient(135deg,var(--orange),#FFB347);padding:5px 10px;border-radius:16px;color:white;font-family:'Fredoka One',cursive;font-size:0.8em;box-shadow:0 2px 8px rgba(255,149,0,0.3)}
+
+        /* === PROGRESS CARD === */
+        .progress-card{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);border-radius:var(--radius);padding:20px;margin-bottom:16px;color:white;position:relative;overflow:hidden}
+        .progress-card::after{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;background:rgba(255,255,255,0.1);border-radius:50%}
+        .progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+        .progress-level{font-family:'Fredoka One',cursive;font-size:1.1em}
+        .progress-xp{font-size:0.8em;opacity:0.9}
+        .progress-bar{height:10px;background:rgba(255,255,255,0.25);border-radius:10px;overflow:hidden}
+        .progress-fill{height:100%;background:white;border-radius:10px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
+        .progress-stats{display:flex;justify-content:space-around;margin-top:16px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.2)}
+        .progress-stat{text-align:center}
+        .progress-stat .val{font-family:'Fredoka One',cursive;font-size:1.2em}
+        .progress-stat .lbl{font-size:0.65em;opacity:0.8;margin-top:2px}
+
+        /* === SECTION GRID === */
+        .section-title{font-family:'Fredoka One',cursive;font-size:1.1em;color:var(--primary-dark);margin:20px 0 12px;padding-right:4px}
+        .section-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+        .section-card{background:rgba(255,255,255,0.9);backdrop-filter:blur(8px);border-radius:var(--radius-sm);padding:20px 14px;text-align:center;cursor:pointer;transition:all 0.3s cubic-bezier(0.4,0,0.2,1);box-shadow:var(--shadow-sm);border:2px solid transparent}
+        .section-card:active{transform:scale(0.96)}
+        .section-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--primary-light)}
+        .section-card .card-icon{width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 10px}
+        .section-card .card-title{font-family:'Fredoka One',cursive;font-size:0.9em;color:#333}
+        .section-card .card-subtitle{font-size:0.7em;color:#aaa;margin-top:3px}
+        .icon-letters{background:linear-gradient(135deg,#FFE0E0,#FFF0F0)}
+        .icon-colors{background:linear-gradient(135deg,#E0F0FF,#F0F8FF)}
+        .icon-numbers{background:linear-gradient(135deg,#E0FFE8,#F0FFF4)}
+        .icon-animals{background:linear-gradient(135deg,#FFF3E0,#FFFAF0)}
+        .icon-matching{background:linear-gradient(135deg,#F0E0FF,#F8F0FF)}
+        .section-card-wide{grid-column:span 2;display:flex;align-items:center;gap:14px;padding:16px 20px;text-align:right}
+        .section-card-wide .card-icon{margin:0;flex-shrink:0}
+        .section-card-wide .card-info{flex:1}
+
+        /* === GAME AREA === */
+        .game-area{background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);border-radius:var(--radius);padding:24px 20px;box-shadow:var(--shadow-md);animation:slide-up 0.4s ease;display:none}
+        .game-area.active{display:block}
+        @keyframes slide-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        .game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+        .game-header h2{font-family:'Fredoka One',cursive;font-size:1.3em;color:var(--primary-dark)}
+        .game-back{background:none;border:none;font-size:1.4em;cursor:pointer;padding:8px;border-radius:12px;transition:background 0.2s}
+        .game-back:hover{background:#f0f4ff}
+
+        /* === LEARN GRID === */
+        .learn-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;margin-bottom:20px}
+        .learn-card{background:#F8FAFF;border-radius:14px;padding:10px 6px;text-align:center;cursor:pointer;transition:all 0.2s;border:2px solid #EEF2FF}
+        .learn-card:hover{transform:translateY(-2px);border-color:var(--primary-light);box-shadow:var(--shadow-sm)}
+        .learn-card:active{transform:scale(0.95)}
+        .learn-card .emoji{font-size:1.5em}
+        .learn-card .eng{font-family:'Fredoka One',cursive;font-size:0.72em;color:var(--primary);margin-top:3px}
+        .learn-card .heb{font-size:0.62em;color:#888}
+
+        /* === QUIZ POPUP === */
+        .quiz-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9000;display:none;backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px}
+        .quiz-overlay.show{display:flex}
+        .quiz-popup{background:white;border-radius:var(--radius);padding:24px 20px;width:100%;max-width:400px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:pop 0.3s ease;position:relative}
+        .quiz-popup-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+        .quiz-popup-header h2{font-family:'Fredoka One',cursive;font-size:1.2em;color:var(--primary-dark)}
+        .quiz-close{background:none;border:none;font-size:1.5em;cursor:pointer;padding:4px 8px;border-radius:10px;transition:background 0.2s}
+        .quiz-close:active{background:#f0f0f0}
+        .quiz-area{text-align:center}
+        .quiz-prompt{font-size:1.1em;margin-bottom:12px;color:#555}
+        .quiz-prompt .big{font-size:3em;display:block;margin:10px 0;animation:pop 0.3s ease}
+        @keyframes pop{from{transform:scale(0.5);opacity:0}to{transform:scale(1);opacity:1}}
+        .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+        .quiz-btn{background:white;color:var(--primary-dark);border:2px solid #E8F0FE;border-radius:14px;padding:12px 8px;font-family:'Fredoka One',cursive;font-size:0.95em;cursor:pointer;transition:all 0.2s}
+        .quiz-btn:active{transform:scale(0.96)}
+        .quiz-btn.correct{background:var(--success);color:white;border-color:var(--success);animation:bounce 0.5s}
+        .quiz-btn.wrong{background:var(--accent);color:white;border-color:var(--accent);animation:shake 0.4s}
+        @keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+        .quiz-score{font-family:'Fredoka One',cursive;color:var(--primary);font-size:0.8em;margin-top:10px}
+        .quiz-feedback{font-size:1em;margin:8px 0;min-height:26px;font-weight:700}
+        .quiz-timer{font-family:'Fredoka One',cursive;font-size:1.3em;color:var(--orange);text-align:center;margin-bottom:8px}
+        .quiz-timer.urgent{color:var(--accent);animation:pulse 0.5s infinite}
+        @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+        .quiz-difficulty{font-size:0.75em;color:#999;margin-bottom:10px;text-align:center}
+        .next-btn{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;border:none;border-radius:14px;padding:12px 28px;font-family:'Fredoka One',cursive;font-size:1em;cursor:pointer;transition:all 0.2s;box-shadow:0 4px 15px rgba(74,144,217,0.3)}
+        .next-btn:hover{transform:scale(1.05)}
+
+        /* === BOTTOM NAV === */
+        .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;padding:6px 10px 14px;display:flex;justify-content:space-around;box-shadow:0 -2px 20px rgba(0,0,0,0.06);z-index:100;border-radius:20px 20px 0 0;display:none}
+        .bottom-nav::-webkit-scrollbar{display:none}
+        .bottom-nav.active{display:flex}
+        .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:8px 14px;border-radius:14px;transition:all 0.2s;position:relative}
+        .nav-item.active{background:linear-gradient(135deg,rgba(74,144,217,0.08),rgba(74,144,217,0.04))}
+        .nav-item.active::after{content:'';position:absolute;bottom:2px;width:20px;height:3px;background:var(--primary);border-radius:3px}
+        .nav-item.active .nav-icon{transform:scale(1.15)}
+        .nav-item.active .nav-label{color:var(--primary);font-weight:700}
+        .nav-icon{font-size:1.5em;transition:transform 0.2s}
+        .nav-label{font-size:0.65em;color:#999;font-weight:600}
+
+        /* === POPUPS === */
+        .bonus-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:9998;display:none;backdrop-filter:blur(8px)}
+        .bonus-overlay.show{display:block}
+        .bonus-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);background:white;border-radius:28px;padding:40px 30px;text-align:center;box-shadow:var(--shadow-lg);z-index:9999;transition:transform 0.4s cubic-bezier(0.68,-0.55,0.27,1.55);max-width:320px;width:90%}
+        .bonus-popup.show{transform:translate(-50%,-50%) scale(1)}
+        .bonus-popup h3{font-family:'Fredoka One',cursive;font-size:1.5em;color:var(--primary-dark);margin:12px 0}
+        .bonus-popup .bonus-emoji{font-size:4em;animation:bounce 0.6s ease}
+        .bonus-popup p{color:#666;margin-bottom:18px}
+        .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:white;border-radius:var(--radius-sm);padding:12px 20px;box-shadow:var(--shadow-md);z-index:9997;display:flex;align-items:center;gap:10px;transition:transform 0.4s cubic-bezier(0.68,-0.55,0.27,1.55)}
+        .toast.show{transform:translateX(-50%) translateY(0)}
+        .toast-emoji{font-size:1.5em}
+        .toast-text{font-family:'Fredoka One',cursive;font-size:0.85em;color:#333}
+
+        /* === DAILY TIP === */
+        .daily-tip{background:linear-gradient(135deg,#FFF8E1,#FFFDE7);border:2px solid #FFE082;border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+        .daily-tip-icon{font-size:1.8em}
+        .daily-tip-text{font-size:0.8em;color:#5D4037;line-height:1.4}
+        .daily-tip-text strong{color:#E65100}
+
+        /* === COIN ANIMATION === */
+        .coin-float{position:fixed;z-index:9996;pointer-events:none;transition:none}
+        .coin-float img{width:50px;height:50px;transition:none}
+
+        /* === CHARACTER POPUP === */
+        .char-popup-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9800;display:none;backdrop-filter:blur(6px);align-items:center;justify-content:center}
+        .char-popup-overlay.show{display:flex}
+        .char-popup{background:white;border-radius:28px;padding:30px;text-align:center;box-shadow:var(--shadow-lg);animation:pop 0.3s ease;position:relative;width:250px;height:280px}
+        .char-popup img.char-big{width:160px;height:160px;border-radius:50%;object-fit:cover;margin-bottom:10px}
+        .char-popup-name{font-family:'Fredoka One',cursive;font-size:1.2em;color:var(--primary-dark)}
+        .char-popup-close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:1.5em;cursor:pointer;color:#999;padding:4px 8px;border-radius:8px}
+        .char-popup-close:active{background:#f0f0f0}
+
+        /* === SHOP === */
+        .shop-btn{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FFD700,#FFA500);padding:6px 12px;border-radius:14px;cursor:pointer;font-family:'Fredoka One',cursive;font-size:0.75em;color:#5D4037;box-shadow:0 2px 8px rgba(255,165,0,0.3);transition:all 0.2s;border:none}
+        .shop-btn:active{transform:scale(0.95)}
+        .shop-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9500;display:none;backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px}
+        .shop-overlay.show{display:flex}
+        .shop-popup{background:white;border-radius:var(--radius);padding:24px 18px;width:100%;max-width:380px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:pop 0.3s ease}
+        .shop-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+        .shop-header h2{font-family:'Fredoka One',cursive;font-size:1.2em;color:var(--primary-dark)}
+        .shop-coins{font-family:'Fredoka One',cursive;font-size:0.9em;color:var(--coin-dark);display:flex;align-items:center;gap:4px}
+        .shop-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+        .shop-item{background:#F8FAFF;border:2px solid #EEF2FF;border-radius:14px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s}
+        .shop-item:active{transform:scale(0.96)}
+        .shop-item.owned{border-color:var(--success);background:#F0FFF4}
+        .shop-item.equipped{border-color:var(--warning);background:#FFFDE7;box-shadow:0 0 10px rgba(255,204,2,0.3)}
+        .shop-item img{width:50px;height:50px;object-fit:contain;margin-bottom:6px}
+        .shop-item-name{font-family:'Fredoka One',cursive;font-size:0.75em;color:#333}
+        .shop-item-price{font-size:0.7em;color:var(--coin-dark);margin-top:3px}
+        .shop-item-status{font-size:0.65em;color:var(--success);margin-top:2px;font-weight:700}
+
+        /* === SPARKLE EFFECT === */
+        .sparkle{position:fixed;pointer-events:none;z-index:9995;animation:sparkle-pop 0.6s ease forwards}
+        @keyframes sparkle-pop{0%{transform:scale(0) rotate(0);opacity:1}50%{transform:scale(1.2) rotate(180deg);opacity:0.8}100%{transform:scale(0) rotate(360deg);opacity:0}}
+
+        /* === PANDA WINK === */
+        .panda-wink{display:inline-block;animation:panda-wiggle 3s ease-in-out infinite}
+        @keyframes panda-wiggle{0%,100%{transform:rotate(0)}15%{transform:rotate(-5deg)}30%{transform:rotate(5deg)}45%{transform:rotate(0)}}
+
+        /* === CARD GLOW ON HOVER === */
+        .section-card::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;border-radius:var(--radius-sm);opacity:0;transition:opacity 0.3s;background:radial-gradient(circle at center,rgba(74,144,217,0.1) 0%,transparent 70%);pointer-events:none}
+        .section-card:hover::after{opacity:1}
+
+        /* === PROGRESS CARD SHIMMER === */
+        .progress-card::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:shimmer 3s ease-in-out infinite}
+        @keyframes shimmer{0%{left:-100%}50%{left:100%}100%{left:100%}}
+
+        /* === GROWING PANDA SVG === */
+        .panda-svg{display:inline-block;position:relative}
+        .panda-svg svg{width:100%;height:100%}
+
+        /* === SPELLING GAME === */
+        .spell-word{font-family:'Fredoka One',cursive;font-size:1.8em;color:var(--primary-dark);letter-spacing:4px;margin:10px 0;min-height:50px;display:flex;align-items:center;justify-content:center;gap:3px;direction:ltr}
+        .spell-slot{width:28px;height:38px;border-bottom:3px solid #ddd;display:inline-flex;align-items:center;justify-content:center;font-size:0.9em;color:var(--primary-dark);transition:all 0.2s;border-radius:4px}
+        .spell-slot.filled{border-bottom-color:var(--primary);background:#F0F4FF}
+        .spell-slot.correct-letter{border-bottom-color:var(--success);background:#E8FFE8;color:var(--success)}
+        .spell-slot.wrong-letter{border-bottom-color:var(--accent);background:#FFE8EE;color:var(--accent);animation:shake 0.3s}
+        .spell-letters{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:14px 0;direction:ltr}
+        .spell-letter-btn{width:38px;height:42px;border:2px solid #E8F0FE;border-radius:10px;background:white;font-family:'Fredoka One',cursive;font-size:1.1em;color:var(--primary-dark);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center}
+        .spell-letter-btn:active{transform:scale(0.9)}
+        .spell-letter-btn.used{opacity:0.3;pointer-events:none;border-color:#eee}
+        .spell-letter-btn:hover{border-color:var(--primary);background:#F8FAFF}
+    </style>
+</head>
+<body>
+
+<!-- Name Input Screen -->
+<div class="name-screen" id="nameScreen">
+    <div style="font-size:2em;margin-bottom:10px">🎮</div>
+    <div class="name-title">ABC Kids</div>
+    <div class="name-subtitle">?היי! מה השם שלך</div>
+    <div class="name-input-wrap">
+        <input type="text" class="name-input" id="nameInput" placeholder="Enter your name" maxlength="15" autocomplete="off">
+        <button class="name-btn" id="nameBtn" onclick="saveName()">כניסה</button>
+    </div>
+    <div class="name-hint">הכניסו את השם באנגלית ✨</div>
+</div>
+
+<!-- Character Select Screen -->
+<div class="char-screen" id="charScreen">
+    <div class="char-title">בחרו חבר!</div>
+    <div class="char-subtitle">מי ילווה אותך בלמידה?</div>
+    <div class="char-grid">
+        <div class="char-option" onclick="selectChar('dog','כלב')" id="char-dog">
+            <img src="char-dog.png" alt="Dog">
+            <div class="char-option-name">כלב</div>
+        </div>
+        <div class="char-option" onclick="selectChar('fox','שועל')" id="char-fox">
+            <img src="char-fox.png" alt="Fox">
+            <div class="char-option-name">שועל</div>
+        </div>
+        <div class="char-option" onclick="selectChar('panda','פנדה')" id="char-panda">
+            <img src="char-panda.png" alt="Panda">
+            <div class="char-option-name">פנדה</div>
+        </div>
+        <div class="char-option" onclick="selectChar('bunny','ארנב')" id="char-bunny">
+            <img src="char-bunny.png" alt="Bunny">
+            <div class="char-option-name">ארנב</div>
+        </div>
+        <div class="char-option" onclick="selectChar('cat','חתול')" id="char-cat">
+            <img src="char-cat.png" alt="Cat">
+            <div class="char-option-name">חתול</div>
+        </div>
+        <div class="char-option" onclick="selectChar('fish','דג')" id="char-fish">
+            <img src="char-fish.png" alt="Fish">
+            <div class="char-option-name">דג</div>
+        </div>
+    </div>
+    <button class="char-confirm-btn" id="charConfirmBtn" onclick="confirmChar()">יאללה נתחיל</button>
+</div>
+
+<!-- Splash / Welcome Screen -->
+<div class="splash" id="splash">
+    <img id="splashCharImg" src="char-panda.png" style="width:120px;height:120px;border-radius:50%;object-fit:cover;box-shadow:0 10px 40px rgba(0,0,0,0.15);animation:mascot-bounce 1.5s ease infinite" alt="Character">
+    <div class="splash-title">ABC Kids</div>
+    <div class="splash-greeting" id="splashGreeting">!</div>
+    <div class="splash-dots"><span></span><span></span><span></span></div>
+</div>
+
+<!-- ABC Background -->
+<div class="abc-bg" id="abcBg"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"><span class="toast-emoji" id="toastEmoji">⭐</span><span class="toast-text" id="toastText"></span></div>
+
+<!-- App -->
+<div class="app" id="mainApp">
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-mascot" id="headerMascot" onclick="openCharPopup()" style="cursor:pointer"></div>
+            <div class="header-info">
+                <div class="header-name" id="headerName">שלום!</div>
+                <div class="header-greeting">בואו נלמד אנגלית</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="shop-btn" onclick="openShop()">🛍️ חנות</button>
+            <div class="header-coins" id="headerCoins">🪙 <span id="coinsVal">0</span></div>
+        </div>
+    </div>
+
+    <!-- Progress Card -->
+    <div class="progress-card" id="progressCard">
+        <div class="progress-top">
+            <div class="progress-level">⭐ רמה <span id="levelVal">1</span> מתוך 10</div>
+            <div class="progress-xp" id="xpText"></div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="xpFill"></div></div>
+        <div class="progress-stats">
+            <div class="progress-stat"><div class="val" id="coinsVal2">0</div><div class="lbl">🪙 מטבעות</div></div>
+            <div class="progress-stat"><div class="val" id="correctVal">0</div><div class="lbl">✅ נכונות</div></div>
+            <div class="progress-stat"><div class="val" id="levelVal2">1</div><div class="lbl">⭐ רמה</div></div>
+        </div>
+    </div>
+
+    <!-- Section Grid -->
+    <div class="section-title" id="sectionTitle">🎮 בחרו נושא</div>
+    <div class="section-grid" id="sectionGrid">
+        <div class="section-card" onclick="openSection('letters')">
+            <div class="card-icon"><img src="icon-letters.png" style="width:50px;height:50px;border-radius:12px"></div>
+            <div class="card-title">אותיות</div>
+            <div class="card-subtitle">A-Z</div>
+        </div>
+        <div class="section-card" onclick="openSection('colors')">
+            <div class="card-icon"><img src="icon-colors.png" style="width:50px;height:50px;border-radius:12px"></div>
+            <div class="card-title">צבעים</div>
+            <div class="card-subtitle">Colors</div>
+        </div>
+        <div class="section-card" onclick="openSection('numbers')">
+            <div class="card-icon"><img src="icon-numbers.png" style="width:50px;height:50px;border-radius:12px"></div>
+            <div class="card-title">מספרים</div>
+            <div class="card-subtitle">1-20</div>
+        </div>
+        <div class="section-card" onclick="openSection('animals')">
+            <div class="card-icon"><img src="icon-animals.png" style="width:50px;height:50px;border-radius:12px"></div>
+            <div class="card-title">חיות</div>
+            <div class="card-subtitle">Animals</div>
+        </div>
+        <div class="section-card section-card-wide" onclick="window.location.href='matching.html'">
+            <div class="card-icon"><img src="icon-matching.png" style="width:50px;height:50px;border-radius:12px"></div>
+            <div class="card-info">
+                <div class="card-title">חיבור קווים</div>
+                <div class="card-subtitle">חברו מילים לתמונות!</div>
+            </div>
+        </div>
+        <div class="section-card" onclick="openSection('days')">
+            <div class="card-icon" style="background:linear-gradient(135deg,#E3F2FD,#F3E5F5);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 10px">📅</div>
+            <div class="card-title">ימות השבוע</div>
+            <div class="card-subtitle">Days</div>
+        </div>
+        <div class="section-card" onclick="openSection('months')">
+            <div class="card-icon" style="background:linear-gradient(135deg,#FFF3E0,#FCE4EC);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 10px">🗓️</div>
+            <div class="card-title">חודשים</div>
+            <div class="card-subtitle">Months</div>
+        </div>
+        <div class="section-card" onclick="openSection('body')">
+            <div class="card-icon" style="background:linear-gradient(135deg,#E8F5E9,#F1F8E9);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 10px">🧍</div>
+            <div class="card-title">גוף</div>
+            <div class="card-subtitle">Body</div>
+        </div>
+        <div class="section-card" onclick="openSection('food')">
+            <div class="card-icon" style="background:linear-gradient(135deg,#FFF8E1,#FFFDE7);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 10px">🍕</div>
+            <div class="card-title">אוכל</div>
+            <div class="card-subtitle">Food</div>
+        </div>
+        <div class="section-card" onclick="openSection('family')">
+            <div class="card-icon" style="background:linear-gradient(135deg,#FCE4EC,#F3E5F5);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 10px">👨‍👩‍👧‍👦</div>
+            <div class="card-title">משפחה</div>
+            <div class="card-subtitle">Family</div>
+        </div>
+        <div class="section-card" onclick="openQuizPopup('uppercase')">
+            <div class="card-icon" style="background:linear-gradient(135deg,#E1F5FE,#B3E5FC);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4em;margin:0 auto 10px;font-family:'Fredoka One',cursive;color:#0277BD">Aa</div>
+            <div class="card-title">גדולות וקטנות</div>
+            <div class="card-subtitle">A=a B=b</div>
+        </div>
+        <div class="section-card" onclick="openQuizPopup('firstletter')">
+            <div class="card-icon" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.4em;margin:0 auto 10px">🔊</div>
+            <div class="card-title">צליל פותח</div>
+            <div class="card-subtitle">?באיזו אות מתחיל</div>
+        </div>
+        <div class="section-card" onclick="openQuizPopup('exam')">
+            <div class="card-icon" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 10px">📝</div>
+            <div class="card-title">מבחן JET</div>
+            <div class="card-subtitle">תרגול למבחן</div>
+        </div>
+        <div class="section-card" onclick="window.location.href='reading.html'">
+            <div class="card-icon" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB);width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8em;margin:0 auto 10px">📖</div>
+            <div class="card-title">משחק קריאה</div>
+            <div class="card-subtitle">4 רמות</div>
+        </div>
+    </div>
+
+    <!-- Game Areas - Learn only -->
+    <div class="game-area" id="game-letters">
+        <div class="game-header"><h2>🔤 אותיות</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="letters-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('letters')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+    <div class="game-area" id="game-colors">
+        <div class="game-header"><h2>🎨 צבעים</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="colors-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('colors')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+    <div class="game-area" id="game-numbers">
+        <div class="game-header"><h2>🔢 מספרים</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="numbers-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('numbers')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+    <div class="game-area" id="game-animals">
+        <div class="game-header"><h2>🐾 חיות</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="animals-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('animals')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+    <div class="game-area" id="game-days">
+        <div class="game-header"><h2>📅 ימות השבוע</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="days-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('days')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+    <div class="game-area" id="game-months">
+        <div class="game-header"><h2>🗓️ חודשים</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="months-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('months')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+    <div class="game-area" id="game-body">
+        <div class="game-header"><h2>🧍 גוף</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="body-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('body')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+    <div class="game-area" id="game-food">
+        <div class="game-header"><h2>🍕 אוכל</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="food-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('food')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+    <div class="game-area" id="game-family">
+        <div class="game-header"><h2>👨‍👩‍👧‍👦 משפחה</h2><button class="game-back" onclick="showHome()">←</button></div>
+        <div id="family-learn" class="learn-grid"></div>
+        <button class="next-btn" onclick="openQuizPopup('family')" style="display:block;margin:0 auto">🎯 התחל חידון</button>
+    </div>
+</div>
+
+<!-- Quiz Popup -->
+<div class="quiz-overlay" id="quizOverlay">
+    <div class="quiz-popup">
+        <div class="quiz-popup-header">
+            <h2 id="quizPopupTitle">חידון</h2>
+            <button class="quiz-close" onclick="closeQuizPopup()">✕</button>
+        </div>
+        <div class="quiz-area" id="quizContent"></div>
+    </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav" id="bottomNav">
+    <div class="nav-item active" onclick="showHome()"><span class="nav-icon">🏠</span><span class="nav-label">בית</span></div>
+    <div class="nav-item" onclick="openSection('letters')"><span class="nav-icon">🔤</span><span class="nav-label">אותיות</span></div>
+    <div class="nav-item" onclick="openSection('colors')"><span class="nav-icon">🎨</span><span class="nav-label">צבעים</span></div>
+    <div class="nav-item" onclick="openSection('animals')"><span class="nav-icon">🐾</span><span class="nav-label">חיות</span></div>
+    <div class="nav-item" onclick="window.location.href='matching.html'"><span class="nav-icon">🔗</span><span class="nav-label">חיבור</span></div>
+</div>
+
+<!-- Character View Popup -->
+<div class="char-popup-overlay" id="charPopupOverlay" onclick="closeCharPopup()">
+    <div class="char-popup" onclick="event.stopPropagation()">
+        <button class="char-popup-close" onclick="closeCharPopup()">✕</button>
+        <div style="position:relative;display:inline-block" id="charPopupContent"></div>
+        <div class="char-popup-name" id="charPopupName"></div>
+    </div>
+</div>
+
+<!-- Shop Popup -->
+<div class="shop-overlay" id="shopOverlay">
+    <div class="shop-popup">
+        <div class="shop-header">
+            <h2>🛍️ חנות</h2>
+            <div class="shop-coins"><img src="coin.png" style="width:20px;height:20px"> <span id="shopCoinsVal">0</span></div>
+            <button class="quiz-close" onclick="closeShop()">✕</button>
+        </div>
+        <p style="font-size:0.8em;color:#888;margin-bottom:12px;text-align:center">קנו אביזרים לדמות שלכם!</p>
+        <div class="shop-grid" id="shopGrid"></div>
+    </div>
+</div>
+
+<!-- Bonus Popup -->
+<div class="bonus-overlay" id="bonusOverlay"></div>
+<div class="bonus-popup" id="bonusPopup">
+    <img src="trophy.png" id="bonusImg" style="width:100px;height:100px;object-fit:contain;animation:bounce 0.6s ease">
+    <h3 id="bonusTitle">כל הכבוד!</h3>
+    <p id="bonusText">עלית רמה!</p>
+    <button class="next-btn" onclick="closeBonus()">המשך! 🚀</button>
+</div>
+</body>
+</html>
+
+<script>
+// === NAME & INIT ===
+let playerName = localStorage.getItem('abcKidsName') || '';
+let playerChar = localStorage.getItem('abcKidsChar') || '';
+
+function saveName(){
+    const input = document.getElementById('nameInput');
+    const name = input.value.trim();
+    if(!name){input.style.border='2px solid var(--accent)';input.placeholder='!הכניסו שם';return;}
+    playerName = name;
+    localStorage.setItem('abcKidsName', name);
+    document.getElementById('nameScreen').classList.add('hide');
+    // Show character selection
+    setTimeout(()=>{document.getElementById('charScreen').classList.add('active');},700);
+}
+
+let selectedCharId = '';
+function selectChar(id, name){
+    selectedCharId = id;
+    document.querySelectorAll('.char-option').forEach(c=>c.classList.remove('selected'));
+    document.getElementById('char-'+id).classList.add('selected');
+    document.getElementById('charConfirmBtn').classList.add('show');
+}
+
+function confirmChar(){
+    if(!selectedCharId) return;
+    playerChar = selectedCharId;
+    localStorage.setItem('abcKidsChar', selectedCharId);
+    document.getElementById('charScreen').classList.add('hide');
+    setTimeout(()=>{
+        updatePanda();
+        document.getElementById('splashCharImg').src = `char-${selectedCharId}.png`;
+        showWelcomeSplash();
+    },700);
+}
+
+// Allow Enter key to submit name
+document.getElementById('nameInput').addEventListener('keydown',function(e){if(e.key==='Enter')saveName();});
+
+function showWelcomeSplash(){
+    document.getElementById('splashGreeting').innerText = `שלום ${playerName}! 🎉`;
+    document.getElementById('splash').classList.add('active');
+    setTimeout(()=>{
+        document.getElementById('splash').classList.add('hide');
+        document.getElementById('mainApp').classList.add('active');
+        document.getElementById('bottomNav').classList.add('active');
+        speak(`Hello ${playerName}! Let's learn English today!`);
+    },2500);
+}
+
+// Check if name already exists
+if(playerName && playerChar){
+    document.getElementById('nameScreen').classList.add('hide');
+    document.getElementById('splashCharImg').src = `char-${playerChar}.png`;
+    showWelcomeSplash();
+} else if(playerName && !playerChar){
+    document.getElementById('nameScreen').classList.add('hide');
+    document.getElementById('charScreen').classList.add('active');
+} else {
+    document.getElementById('nameScreen').style.display='flex';
+}
+
+// === DATA ===
+const data = {
+    letters: [
+        {q:'A',emoji:'🍎',eng:'Apple',heb:'תפוח'},{q:'B',emoji:'⚽',eng:'Ball',heb:'כדור'},
+        {q:'C',emoji:'🐱',eng:'Cat',heb:'חתול'},{q:'D',emoji:'🐶',eng:'Dog',heb:'כלב'},
+        {q:'E',emoji:'🐘',eng:'Elephant',heb:'פיל'},{q:'F',emoji:'🐟',eng:'Fish',heb:'דג'},
+        {q:'G',emoji:'🦒',eng:'Giraffe',heb:"ג'ירפה"},{q:'H',emoji:'🏠',eng:'House',heb:'בית'},
+        {q:'I',emoji:'🍦',eng:'Ice cream',heb:'גלידה'},{q:'J',emoji:'🧃',eng:'Juice',heb:'מיץ'},
+        {q:'K',emoji:'🪁',eng:'Kite',heb:'עפיפון'},{q:'L',emoji:'🦁',eng:'Lion',heb:'אריה'},
+        {q:'M',emoji:'🌙',eng:'Moon',heb:'ירח'},{q:'N',emoji:'🐦',eng:'Nest',heb:'קן'},
+        {q:'O',emoji:'🍊',eng:'Orange',heb:'תפוז'},{q:'P',emoji:'🐧',eng:'Penguin',heb:'פינגווין'},
+        {q:'Q',emoji:'👑',eng:'Queen',heb:'מלכה'},{q:'R',emoji:'🌈',eng:'Rainbow',heb:'קשת'},
+        {q:'S',emoji:'⭐',eng:'Star',heb:'כוכב'},{q:'T',emoji:'🌳',eng:'Tree',heb:'עץ'},
+        {q:'U',emoji:'☂️',eng:'Umbrella',heb:'מטריה'},{q:'V',emoji:'🎻',eng:'Violin',heb:'כינור'},
+        {q:'W',emoji:'🐋',eng:'Whale',heb:'לוויתן'},{q:'X',emoji:'🎵',eng:'Xylophone',heb:'קסילופון'},
+        {q:'Y',emoji:'🥛',eng:'Yogurt',heb:'יוגורט'},{q:'Z',emoji:'🦓',eng:'Zebra',heb:'זברה'}
+    ],
+    colors: [
+        {q:'Red',emoji:'🔴',eng:'Red',heb:'אדום'},{q:'Blue',emoji:'🔵',eng:'Blue',heb:'כחול'},
+        {q:'Green',emoji:'🟢',eng:'Green',heb:'ירוק'},{q:'Yellow',emoji:'🟡',eng:'Yellow',heb:'צהוב'},
+        {q:'Orange',emoji:'🟠',eng:'Orange',heb:'כתום'},{q:'Purple',emoji:'🟣',eng:'Purple',heb:'סגול'},
+        {q:'Pink',emoji:'🩷',eng:'Pink',heb:'ורוד'},{q:'Brown',emoji:'🟤',eng:'Brown',heb:'חום'},
+        {q:'Black',emoji:'⚫',eng:'Black',heb:'שחור'},{q:'White',emoji:'⚪',eng:'White',heb:'לבן'},
+        {q:'Gray',emoji:'🩶',eng:'Gray',heb:'אפור'}
+    ],
+    numbers: [
+        {q:'1',emoji:'①',eng:'One',heb:'אחד'},{q:'2',emoji:'②',eng:'Two',heb:'שתיים'},
+        {q:'3',emoji:'③',eng:'Three',heb:'שלוש'},{q:'4',emoji:'④',eng:'Four',heb:'ארבע'},
+        {q:'5',emoji:'⑤',eng:'Five',heb:'חמש'},{q:'6',emoji:'⑥',eng:'Six',heb:'שש'},
+        {q:'7',emoji:'⑦',eng:'Seven',heb:'שבע'},{q:'8',emoji:'⑧',eng:'Eight',heb:'שמונה'},
+        {q:'9',emoji:'⑨',eng:'Nine',heb:'תשע'},{q:'10',emoji:'⑩',eng:'Ten',heb:'עשר'},
+        {q:'11',emoji:'⑪',eng:'Eleven',heb:'אחת עשרה'},{q:'12',emoji:'⑫',eng:'Twelve',heb:'שתים עשרה'},
+        {q:'13',emoji:'⑬',eng:'Thirteen',heb:'שלוש עשרה'},{q:'14',emoji:'⑭',eng:'Fourteen',heb:'ארבע עשרה'},
+        {q:'15',emoji:'⑮',eng:'Fifteen',heb:'חמש עשרה'},{q:'16',emoji:'⑯',eng:'Sixteen',heb:'שש עשרה'},
+        {q:'17',emoji:'⑰',eng:'Seventeen',heb:'שבע עשרה'},{q:'18',emoji:'⑱',eng:'Eighteen',heb:'שמונה עשרה'},
+        {q:'19',emoji:'⑲',eng:'Nineteen',heb:'תשע עשרה'},{q:'20',emoji:'⑳',eng:'Twenty',heb:'עשרים'}
+    ],
+    animals: [
+        {q:'Dog',emoji:'🐶',eng:'Dog',heb:'כלב'},{q:'Cat',emoji:'🐱',eng:'Cat',heb:'חתול'},
+        {q:'Bird',emoji:'🐦',eng:'Bird',heb:'ציפור'},{q:'Fish',emoji:'🐟',eng:'Fish',heb:'דג'},
+        {q:'Lion',emoji:'🦁',eng:'Lion',heb:'אריה'},{q:'Bear',emoji:'🐻',eng:'Bear',heb:'דוב'},
+        {q:'Frog',emoji:'🐸',eng:'Frog',heb:'צפרדע'},{q:'Duck',emoji:'🦆',eng:'Duck',heb:'ברווז'},
+        {q:'Horse',emoji:'🐴',eng:'Horse',heb:'סוס'},{q:'Cow',emoji:'🐄',eng:'Cow',heb:'פרה'},
+        {q:'Monkey',emoji:'🐵',eng:'Monkey',heb:'קוף'},{q:'Rabbit',emoji:'🐰',eng:'Rabbit',heb:'ארנב'},
+        {q:'Elephant',emoji:'🐘',eng:'Elephant',heb:'פיל'},{q:'Turtle',emoji:'🐢',eng:'Turtle',heb:'צב'},
+        {q:'Butterfly',emoji:'🦋',eng:'Butterfly',heb:'פרפר'},{q:'Penguin',emoji:'🐧',eng:'Penguin',heb:'פינגווין'}
+    ],
+    days: [
+        {q:'ראשון',emoji:'1️⃣',eng:'Sunday',heb:'ראשון'},{q:'שני',emoji:'2️⃣',eng:'Monday',heb:'שני'},
+        {q:'שלישי',emoji:'3️⃣',eng:'Tuesday',heb:'שלישי'},{q:'רביעי',emoji:'4️⃣',eng:'Wednesday',heb:'רביעי'},
+        {q:'חמישי',emoji:'5️⃣',eng:'Thursday',heb:'חמישי'},{q:'שישי',emoji:'6️⃣',eng:'Friday',heb:'שישי'},
+        {q:'שבת',emoji:'7️⃣',eng:'Saturday',heb:'שבת'}
+    ],
+    months: [
+        {q:'ינואר',emoji:'1️⃣',eng:'January',heb:'ינואר'},{q:'פברואר',emoji:'2️⃣',eng:'February',heb:'פברואר'},
+        {q:'מרץ',emoji:'3️⃣',eng:'March',heb:'מרץ'},{q:'אפריל',emoji:'4️⃣',eng:'April',heb:'אפריל'},
+        {q:'מאי',emoji:'5️⃣',eng:'May',heb:'מאי'},{q:'יוני',emoji:'6️⃣',eng:'June',heb:'יוני'},
+        {q:'יולי',emoji:'7️⃣',eng:'July',heb:'יולי'},{q:'אוגוסט',emoji:'8️⃣',eng:'August',heb:'אוגוסט'},
+        {q:'ספטמבר',emoji:'9️⃣',eng:'September',heb:'ספטמבר'},{q:'אוקטובר',emoji:'🔟',eng:'October',heb:'אוקטובר'},
+        {q:'נובמבר',emoji:'1️⃣1️⃣',eng:'November',heb:'נובמבר'},{q:'דצמבר',emoji:'1️⃣2️⃣',eng:'December',heb:'דצמבר'}
+    ],
+    body: [
+        {q:'Head',emoji:'🗣️',eng:'Head',heb:'ראש'},{q:'Eye',emoji:'👁️',eng:'Eye',heb:'עין'},
+        {q:'Ear',emoji:'👂',eng:'Ear',heb:'אוזן'},{q:'Nose',emoji:'👃',eng:'Nose',heb:'אף'},
+        {q:'Mouth',emoji:'👄',eng:'Mouth',heb:'פה'},{q:'Hand',emoji:'✋',eng:'Hand',heb:'יד'},
+        {q:'Foot',emoji:'🦶',eng:'Foot',heb:'רגל'},{q:'Leg',emoji:'🦵',eng:'Leg',heb:'רגל'},
+        {q:'Arm',emoji:'💪',eng:'Arm',heb:'זרוע'},{q:'Finger',emoji:'☝️',eng:'Finger',heb:'אצבע'},
+        {q:'Hair',emoji:'💇',eng:'Hair',heb:'שיער'},{q:'Teeth',emoji:'🦷',eng:'Teeth',heb:'שיניים'}
+    ],
+    food: [
+        {q:'Apple',emoji:'🍎',eng:'Apple',heb:'תפוח'},{q:'Banana',emoji:'🍌',eng:'Banana',heb:'בננה'},
+        {q:'Pizza',emoji:'🍕',eng:'Pizza',heb:'פיצה'},{q:'Bread',emoji:'🍞',eng:'Bread',heb:'לחם'},
+        {q:'Milk',emoji:'🥛',eng:'Milk',heb:'חלב'},{q:'Egg',emoji:'🥚',eng:'Egg',heb:'ביצה'},
+        {q:'Rice',emoji:'🍚',eng:'Rice',heb:'אורז'},{q:'Cake',emoji:'🎂',eng:'Cake',heb:'עוגה'},
+        {q:'Ice cream',emoji:'🍦',eng:'Ice cream',heb:'גלידה'},{q:'Water',emoji:'💧',eng:'Water',heb:'מים'},
+        {q:'Juice',emoji:'🧃',eng:'Juice',heb:'מיץ'},{q:'Chicken',emoji:'🍗',eng:'Chicken',heb:'עוף'}
+    ],
+    family: [
+        {q:'Mom',emoji:'👩',eng:'Mom',heb:'אמא'},{q:'Dad',emoji:'👨',eng:'Dad',heb:'אבא'},
+        {q:'Brother',emoji:'👦',eng:'Brother',heb:'אח'},{q:'Sister',emoji:'👧',eng:'Sister',heb:'אחות'},
+        {q:'Baby',emoji:'👶',eng:'Baby',heb:'תינוק'},{q:'Grandma',emoji:'👵',eng:'Grandma',heb:'סבתא'},
+        {q:'Grandpa',emoji:'👴',eng:'Grandpa',heb:'סבא'},{q:'Uncle',emoji:'👨‍🦱',eng:'Uncle',heb:'דוד'},
+        {q:'Aunt',emoji:'👩‍🦱',eng:'Aunt',heb:'דודה'},{q:'Friend',emoji:'🤝',eng:'Friend',heb:'חבר'}
+    ],
+    uppercase: [
+        {q:'A',emoji:'A',eng:'a',heb:'a'},{q:'B',emoji:'B',eng:'b',heb:'b'},
+        {q:'C',emoji:'C',eng:'c',heb:'c'},{q:'D',emoji:'D',eng:'d',heb:'d'},
+        {q:'E',emoji:'E',eng:'e',heb:'e'},{q:'F',emoji:'F',eng:'f',heb:'f'},
+        {q:'G',emoji:'G',eng:'g',heb:'g'},{q:'H',emoji:'H',eng:'h',heb:'h'},
+        {q:'I',emoji:'I',eng:'i',heb:'i'},{q:'J',emoji:'J',eng:'j',heb:'j'},
+        {q:'K',emoji:'K',eng:'k',heb:'k'},{q:'L',emoji:'L',eng:'l',heb:'l'},
+        {q:'M',emoji:'M',eng:'m',heb:'m'},{q:'N',emoji:'N',eng:'n',heb:'n'},
+        {q:'O',emoji:'O',eng:'o',heb:'o'},{q:'P',emoji:'P',eng:'p',heb:'p'},
+        {q:'Q',emoji:'Q',eng:'q',heb:'q'},{q:'R',emoji:'R',eng:'r',heb:'r'},
+        {q:'S',emoji:'S',eng:'s',heb:'s'},{q:'T',emoji:'T',eng:'t',heb:'t'},
+        {q:'U',emoji:'U',eng:'u',heb:'u'},{q:'V',emoji:'V',eng:'v',heb:'v'},
+        {q:'W',emoji:'W',eng:'w',heb:'w'},{q:'X',emoji:'X',eng:'x',heb:'x'},
+        {q:'Y',emoji:'Y',eng:'y',heb:'y'},{q:'Z',emoji:'Z',eng:'z',heb:'z'}
+    ],
+    firstletter: [
+        {q:'Cow',emoji:'🐄',eng:'C',heb:'C'},{q:'Carrot',emoji:'🥕',eng:'C',heb:'C'},
+        {q:'Mouse',emoji:'🐭',eng:'M',heb:'M'},{q:'Melon',emoji:'🍈',eng:'M',heb:'M'},
+        {q:'Orange',emoji:'🍊',eng:'O',heb:'O'},{q:'Run',emoji:'🏃',eng:'R',heb:'R'},
+        {q:'Rabbit',emoji:'🐰',eng:'R',heb:'R'},{q:'Iguana',emoji:'🦎',eng:'I',heb:'I'},
+        {q:'Pen',emoji:'🖊️',eng:'P',heb:'P'},{q:'Play',emoji:'⚽',eng:'P',heb:'P'},
+        {q:'Telephone',emoji:'📞',eng:'T',heb:'T'},{q:'Table',emoji:'🪑',eng:'T',heb:'T'},
+        {q:'Teacher',emoji:'👩‍🏫',eng:'T',heb:'T'},{q:'Egg',emoji:'🥚',eng:'E',heb:'E'},
+        {q:'Elephant',emoji:'🐘',eng:'E',heb:'E'},{q:'Juice',emoji:'🧃',eng:'J',heb:'J'},
+        {q:'Small',emoji:'🤏',eng:'S',heb:'S'},{q:'Big',emoji:'💪',eng:'B',heb:'B'},
+        {q:'Fish',emoji:'🐟',eng:'F',heb:'F'},{q:'Farm',emoji:'🌾',eng:'F',heb:'F'},
+        {q:'Sun',emoji:'☀️',eng:'S',heb:'S'},{q:'Hand',emoji:'✋',eng:'H',heb:'H'},
+        {q:'Happy',emoji:'😊',eng:'H',heb:'H'},{q:'Lamp',emoji:'💡',eng:'L',heb:'L'},
+        {q:'Leg',emoji:'🦵',eng:'L',heb:'L'},{q:'Dog',emoji:'🐶',eng:'D',heb:'D'},
+        {q:'Hat',emoji:'🎩',eng:'H',heb:'H'},{q:'Bag',emoji:'🎒',eng:'B',heb:'B'},
+        {q:'Cat',emoji:'🐱',eng:'C',heb:'C'},{q:'Bed',emoji:'🛏️',eng:'B',heb:'B'}
+    ],
+    exam: [
+        {q:'Cow',emoji:'🐄',eng:'Cow',heb:'פרה'},{q:'Carrot',emoji:'🥕',eng:'Carrot',heb:'גזר'},
+        {q:'Mouse',emoji:'🐭',eng:'Mouse',heb:'עכבר'},{q:'Melon',emoji:'🍈',eng:'Melon',heb:'מלון'},
+        {q:'Orange',emoji:'🍊',eng:'Orange',heb:'תפוז'},{q:'Run',emoji:'🏃',eng:'Run',heb:'לרוץ'},
+        {q:'Rabbit',emoji:'🐰',eng:'Rabbit',heb:'ארנב'},{q:'Iguana',emoji:'🦎',eng:'Iguana',heb:'אגואנה'},
+        {q:'Igloo',emoji:'🏠',eng:'Igloo',heb:'אגלו'},{q:'Pen',emoji:'🖊️',eng:'Pen',heb:'עט'},
+        {q:'Play',emoji:'⚽',eng:'Play',heb:'לשחק'},{q:'Telephone',emoji:'📞',eng:'Telephone',heb:'טלפון'},
+        {q:'Table',emoji:'🪑',eng:'Table',heb:'שולחן'},{q:'Teacher',emoji:'👩‍🏫',eng:'Teacher',heb:'מורה'},
+        {q:'Egg',emoji:'🥚',eng:'Egg',heb:'ביצה'},{q:'Elephant',emoji:'🐘',eng:'Elephant',heb:'פיל'},
+        {q:'Juice',emoji:'🧃',eng:'Juice',heb:'מיץ'},{q:'Small',emoji:'🤏',eng:'Small',heb:'קטן'},
+        {q:'Big',emoji:'💪',eng:'Big',heb:'גדול'},{q:'Fish',emoji:'🐟',eng:'Fish',heb:'דג'},
+        {q:'Farm',emoji:'🌾',eng:'Farm',heb:'חווה'},{q:'Sad',emoji:'😢',eng:'Sad',heb:'עצוב'},
+        {q:'Sun',emoji:'☀️',eng:'Sun',heb:'שמש'},{q:'Hand',emoji:'✋',eng:'Hand',heb:'יד'},
+        {q:'Happy',emoji:'😊',eng:'Happy',heb:'שמח'},{q:'Lamp',emoji:'💡',eng:'Lamp',heb:'מנורה'},
+        {q:'Leg',emoji:'🦵',eng:'Leg',heb:'רגל'},{q:'Mat',emoji:'🟫',eng:'Mat',heb:'שטיחון'},
+        {q:'Hat',emoji:'🎩',eng:'Hat',heb:'כובע'},{q:'Bag',emoji:'🎒',eng:'Bag',heb:'תיק'},
+        {q:'Ten',emoji:'🔟',eng:'Ten',heb:'עשר'},{q:'Dog',emoji:'🐶',eng:'Dog',heb:'כלב'},
+        {q:'Man',emoji:'👨',eng:'Man',heb:'איש'},{q:'Bad',emoji:'👎',eng:'Bad',heb:'רע'},
+        {q:'Mom',emoji:'👩',eng:'Mom',heb:'אמא'},{q:'Cat',emoji:'🐱',eng:'Cat',heb:'חתול'},
+        {q:'Bed',emoji:'🛏️',eng:'Bed',heb:'מיטה'},{q:'Mad',emoji:'😠',eng:'Mad',heb:'כועס'},
+        {q:'Hen',emoji:'🐔',eng:'Hen',heb:'תרנגולת'}
+    ]
+};
+
+// === STATE ===
+let state = JSON.parse(localStorage.getItem('abcKidsState')) || {xp:0, coins:0, level:1, streak:0, totalCorrect:0, lastDate:null};
+function saveState(){localStorage.setItem('abcKidsState',JSON.stringify(state))}
+
+// Check streak
+const today = new Date().toDateString();
+if(state.lastDate && state.lastDate !== today){
+    const last = new Date(state.lastDate);
+    const diff = Math.floor((new Date()-last)/(1000*60*60*24));
+    if(diff > 1) state.streak = 0;
+}
+if(state.lastDate !== today){state.lastDate = today; state.streak++; saveState();}
+
+const XP_PER_LEVEL = 20;
+const MAX_LEVEL = 10;
+
+// Coin bonus based on equipped outfit
+function getCoinBonus(){
+    const equipped = localStorage.getItem('abcKidsEquipped') || '';
+    if(equipped === 'diamond') return 2; // +2 extra per action
+    if(equipped === 'gold') return 1; // +1 extra per action
+    return 0;
+}
+const praises = ['Great job!','Excellent!','Amazing!','Well done!','Perfect!','Awesome!','Super!','Fantastic!'];
+const tryAgains = ['Try again!','Not quite!','Almost!','Oops!'];
+
+// === UI FUNCTIONS ===
+function updateUI(){
+    const xpInLevel = state.xp % XP_PER_LEVEL;
+    state.level = Math.min(Math.floor(state.xp / XP_PER_LEVEL) + 1, MAX_LEVEL);
+    const fillPct = state.level >= MAX_LEVEL ? 100 : (xpInLevel/XP_PER_LEVEL*100);
+    document.getElementById('xpFill').style.width = fillPct+'%';
+    document.getElementById('xpText').innerText = state.level >= MAX_LEVEL ? '🏆 מקסימום!' : '';
+    document.getElementById('coinsVal').innerText = state.coins;
+    document.getElementById('coinsVal2').innerText = state.coins;
+    document.getElementById('levelVal').innerText = state.level;
+    document.getElementById('levelVal2').innerText = state.level;
+    document.getElementById('correctVal').innerText = state.totalCorrect;
+    document.getElementById('headerName').innerText = playerName ? `שלום ${playerName}!` : '!שלום';
+    saveState();
+}
+
+function addXP(amount){
+    const oldLevel = state.level;
+    state.xp += amount;
+    state.level = Math.min(Math.floor(state.xp / XP_PER_LEVEL) + 1, MAX_LEVEL);
+    updateUI();
+    if(state.level > oldLevel && state.level <= MAX_LEVEL){
+        if(state.level === MAX_LEVEL) showBonus('🏆',`${playerName} הגעת לרמה מקסימלית!`,'!אלוף');
+        else showBonus('🏆',`${playerName} עלית לרמה ${state.level} מתוך 10!`,'!כל הכבוד');
+    }
+}
+
+function addCoins(amount){
+    state.coins += amount;
+    updateUI();
+    showCoinAnimation();
+    playSound('coin');
+    showToast('🪙',`+${amount} מטבעות!`);
+}
+
+function showCoinAnimation(){
+    const counterEl = document.getElementById('headerCoins');
+    if(!counterEl) return;
+    const counterRect = counterEl.getBoundingClientRect();
+    const targetX = counterRect.left + counterRect.width/2;
+    const targetY = counterRect.top + counterRect.height/2;
+    
+    for(let i=0;i<4;i++){
+        setTimeout(()=>{
+            const coin = document.createElement('div');
+            coin.className='coin-float';
+            coin.innerHTML='<img src="coin.png">';
+            document.body.appendChild(coin);
+            
+            // Start position: center of screen, big
+            const startX = window.innerWidth/2 + (Math.random()-0.5)*120;
+            const startY = window.innerHeight/2 + (Math.random()-0.5)*60;
+            coin.style.left = startX+'px';
+            coin.style.top = startY+'px';
+            coin.style.transform = 'translate(-50%,-50%) scale(1.3)';
+            coin.style.opacity = '1';
+            
+            // Animate to counter using requestAnimationFrame
+            const duration = 700;
+            const startTime = performance.now();
+            
+            function animate(now){
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // Ease out cubic
+                const ease = 1 - Math.pow(1 - progress, 3);
+                
+                const currentX = startX + (targetX - startX) * ease;
+                const currentY = startY + (targetY - startY) * ease;
+                const scale = 1.3 - (1.0 * ease); // 1.3 -> 0.3
+                
+                coin.style.left = currentX+'px';
+                coin.style.top = currentY+'px';
+                coin.style.transform = `translate(-50%,-50%) scale(${scale})`;
+                coin.style.opacity = String(1 - progress*0.4);
+                
+                if(progress < 1){
+                    requestAnimationFrame(animate);
+                } else {
+                    // Arrived! Pulse counter
+                    counterEl.style.transform='scale(1.3)';
+                    setTimeout(()=>{counterEl.style.transform='scale(1)';},200);
+                    coin.remove();
+                }
+            }
+            requestAnimationFrame(animate);
+        }, i*150);
+    }
+}
+
+function showToast(emoji,text){
+    const t=document.getElementById('toast');
+    document.getElementById('toastEmoji').innerText=emoji;
+    document.getElementById('toastText').innerText=text;
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+function showBonus(emoji,title,text){
+    const img = document.getElementById('bonusImg');
+    img.src = 'treasure.png';
+    document.getElementById('bonusTitle').innerText=title;
+    document.getElementById('bonusText').innerText=text;
+    document.getElementById('bonusPopup').classList.add('show');
+    document.getElementById('bonusOverlay').classList.add('show');
+}
+function closeBonus(){
+    document.getElementById('bonusPopup').classList.remove('show');
+    document.getElementById('bonusOverlay').classList.remove('show');
+}
+
+function speak(text){
+    if('speechSynthesis' in window){
+        window.speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance(text);
+        u.lang='en-US';u.rate=0.8;u.pitch=1.1;
+        window.speechSynthesis.speak(u);
+    }
+}
+</script>
+
+<script>
+// === NAVIGATION ===
+let currentSection = null;
+
+function showHome(){
+    document.querySelectorAll('.game-area').forEach(g=>g.classList.remove('active'));
+    document.getElementById('sectionGrid').style.display='grid';
+    document.getElementById('sectionTitle').style.display='block';
+    document.getElementById('progressCard').style.display='block';
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.nav-item')[0].classList.add('active');
+    currentSection=null;
+}
+
+function openSection(name){
+    document.getElementById('sectionGrid').style.display='none';
+    document.getElementById('sectionTitle').style.display='none';
+    document.getElementById('progressCard').style.display='none';
+    document.querySelectorAll('.game-area').forEach(g=>g.classList.remove('active'));
+    document.getElementById('game-'+name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    currentSection=name;
+}
+
+// === BUILD LEARN GRIDS ===
+function buildLearnGrid(category, containerId){
+    const container = document.getElementById(containerId);
+    data[category].forEach(item=>{
+        const card = document.createElement('div');
+        card.className='learn-card';
+        card.innerHTML=`<div class="emoji">${item.emoji}</div><div class="eng">${item.eng}</div><div class="heb">${item.heb}</div>`;
+        card.onclick=()=>{speak(item.eng);card.style.transform='scale(0.9)';setTimeout(()=>card.style.transform='',200)};
+        container.appendChild(card);
+    });
+}
+buildLearnGrid('letters','letters-learn');
+buildLearnGrid('colors','colors-learn');
+buildLearnGrid('numbers','numbers-learn');
+buildLearnGrid('animals','animals-learn');
+buildLearnGrid('days','days-learn');
+buildLearnGrid('months','months-learn');
+buildLearnGrid('body','body-learn');
+buildLearnGrid('food','food-learn');
+buildLearnGrid('family','family-learn');
+
+// === QUIZ ENGINE WITH DIFFICULTY (POPUP) ===
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+let quizTimerInterval = null;
+let quizActive = false;
+
+function getDifficulty(){
+    const lvl = state.level || 1;
+    if(lvl <= 2) return {numOptions:4, showHint:true, timer:0, reverse:false, spelling:false, label:'קל 🟢'};
+    if(lvl <= 4) return {numOptions:4, showHint:false, timer:0, reverse:false, spelling:false, label:'בינוני 🟡'};
+    if(lvl <= 6) return {numOptions:5, showHint:false, timer:12, reverse:false, spelling:false, label:'קשה 🟠'};
+    if(lvl <= 8) return {numOptions:6, showHint:false, timer:10, reverse:true, spelling:false, label:'מומחה 🔴'};
+    return {numOptions:6, showHint:false, timer:0, reverse:false, spelling:true, label:'אלוף האיות ✍️'};
+}
+
+function openQuizPopup(category){
+    const titles = {letters:'🔤 חידון אותיות', colors:'🎨 חידון צבעים', numbers:'🔢 חידון מספרים', animals:'🐾 חידון חיות'};
+    document.getElementById('quizPopupTitle').innerText = titles[category] || 'חידון';
+    document.getElementById('quizOverlay').classList.add('show');
+    quizActive = true;
+    createQuiz(category);
+}
+
+function closeQuizPopup(){
+    clearQuizTimer();
+    quizActive = false;
+    document.getElementById('quizOverlay').classList.remove('show');
+}
+
+function clearQuizTimer(){if(quizTimerInterval){clearInterval(quizTimerInterval);quizTimerInterval=null;}}
+
+function createQuiz(category){
+    const container = document.getElementById('quizContent');
+    const items = data[category];
+    const shuffled = shuffle(items);
+    const diff = getDifficulty();
+    const numQuestions = Math.min(10, items.length);
+    let qi=0, co=0, to=0;
+
+    function renderQuestion(){
+        clearQuizTimer();
+        if(!quizActive) return;
+
+        if(qi >= numQuestions){
+            const pct=Math.round((co/to)*100);
+            let msg = pct>=80?'🌟 מדהים!':pct>=60?'👏 יפה מאוד!':'💪 נסה שוב!';
+            const coinPerQ = 2 + getCoinBonus();
+            const coinsEarned = co * coinPerQ;
+            container.innerHTML=`
+                <img src="treasure.png" style="width:100px;height:100px;object-fit:contain;margin:0 auto;display:block;animation:pop 0.4s ease">
+                <div class="quiz-feedback" style="font-size:1.5em;margin:10px 0">${msg}</div>
+                <div class="quiz-difficulty">${diff.label}</div>
+                <div style="font-size:1.1em;margin:8px 0">${co}/${to} תשובות נכונות</div>
+                <div style="font-size:1em;margin:8px 0;color:var(--coin-dark)">🪙 +${coinsEarned} מטבעות</div>
+                <button class="next-btn" onclick="createQuiz('${category}')" style="margin:10px 5px">🔄 שוב</button>
+                <button class="next-btn" onclick="closeQuizPopup()" style="margin:10px 5px;background:linear-gradient(135deg,var(--success),#66D97A)">✓ סיום</button>`;
+            if(co>=7){addCoins(5);speak('Congratulations!');}
+            return;
+        }
+
+        const item = shuffled[qi];
+
+        if(diff.spelling && category !== 'uppercase' && category !== 'firstletter'){
+            // SPELLING MODE: show emoji, spell the word letter by letter
+            const word = item.eng.toUpperCase();
+            const letters = word.split('');
+            // Create scrambled letters + some random extras
+            let availableLetters = [...letters];
+            const extras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            while(availableLetters.length < letters.length + 3){
+                const r = extras[Math.floor(Math.random()*extras.length)];
+                if(!availableLetters.includes(r) || availableLetters.length < letters.length + 2) availableLetters.push(r);
+            }
+            availableLetters = shuffle(availableLetters);
+
+            let currentPos = 0;
+            let spelledCorrect = true;
+
+            const slotsHtml = letters.map((_,i)=>`<span class="spell-slot" id="slot-${i}"></span>`).join('');
+            container.innerHTML=`
+                <div class="quiz-difficulty">${diff.label}</div>
+                <div class="quiz-prompt"><span class="big">${item.emoji}</span>!איית את המילה</div>
+                <div class="spell-word" id="spellSlots">${slotsHtml}</div>
+                <div class="spell-letters" id="spellLetters"></div>
+                <div class="quiz-score">שאלה ${qi+1}/${numQuestions} | ✅ ${co} | 🪙 ${state.coins}</div>
+                <div class="quiz-feedback" id="quizFb"></div>`;
+
+            const lettersDiv = document.getElementById('spellLetters');
+            availableLetters.forEach((letter, idx)=>{
+                const btn = document.createElement('button');
+                btn.className='spell-letter-btn';
+                btn.innerText=letter;
+                btn.id='lbtn-'+idx;
+                btn.onclick=()=>{
+                    if(currentPos >= letters.length) return;
+                    const slot = document.getElementById('slot-'+currentPos);
+                    if(letter === letters[currentPos]){
+                        slot.innerText = letter;
+                        slot.classList.add('filled','correct-letter');
+                        btn.classList.add('used');
+                        playSound('correct');
+                        currentPos++;
+                        if(currentPos >= letters.length){
+                            // Word complete!
+                            to++;co++;
+                            state.totalCorrect++;
+                            addXP(3);
+                            state.coins += 3;
+                            updateUI();
+                            showCoinAnimation();
+                            speak('Perfect spelling!');
+                            document.getElementById('quizFb').innerHTML='<span style="color:var(--success)">✅ מושלם! +3 🪙</span>';
+                            qi++;
+                            setTimeout(renderQuestion,1500);
+                        }
+                    } else {
+                        slot.classList.add('wrong-letter');
+                        playSound('wrong');
+                        spelledCorrect = false;
+                        setTimeout(()=>slot.classList.remove('wrong-letter'),400);
+                        // After 3 wrong attempts on same position, show the letter
+                    }
+                };
+                lettersDiv.appendChild(btn);
+            });
+            speak(item.eng);
+
+        } else if(diff.reverse && category !== 'uppercase' && category !== 'firstletter'){
+            // Reverse: show word, pick emoji
+            let emojiOpts=[item.emoji];
+            while(emojiOpts.length<diff.numOptions){
+                const r=items[Math.floor(Math.random()*items.length)].emoji;
+                if(!emojiOpts.includes(r))emojiOpts.push(r);
+            }
+            emojiOpts=shuffle(emojiOpts);
+            container.innerHTML=`
+                ${diff.timer?'<div class="quiz-timer" id="quizTimer">⏱️ '+diff.timer+'</div>':''}
+                <div class="quiz-difficulty">${diff.label}</div>
+                <div class="quiz-prompt"><span class="big" style="font-size:2em;font-family:'Fredoka One',cursive;color:var(--primary-dark)">${item.eng}</span>?מה האימוג'י הנכון</div>
+                <div class="quiz-options" id="quizOpts" style="grid-template-columns:repeat(3,1fr)"></div>
+                <div class="quiz-score">שאלה ${qi+1}/${numQuestions} | ✅ ${co} | 🪙 ${state.coins}</div>
+                <div class="quiz-feedback" id="quizFb"></div>`;
+            const optsDiv=document.getElementById('quizOpts');
+            emojiOpts.forEach(em=>{
+                const b=document.createElement('button');b.className='quiz-btn';b.innerText=em;b.style.fontSize='1.6em';
+                b.onclick=()=>handleAnswer(em===item.emoji, item, b);
+                optsDiv.appendChild(b);
+            });
+        } else {
+            // Normal: show emoji, pick word
+            let opts=[item.eng];
+            while(opts.length<diff.numOptions){const r=items[Math.floor(Math.random()*items.length)].eng;if(!opts.includes(r))opts.push(r);}
+            opts=shuffle(opts);
+            const hintHtml = diff.showHint ? `<div style="font-size:0.85em;color:#888;margin-top:4px">${item.heb}</div>` : '';
+            const gridCols = diff.numOptions > 4 ? 'repeat(3,1fr)' : '1fr 1fr';
+            const isUppercase = (category === 'uppercase');
+            const isFirstLetter = (category === 'firstletter');
+            let promptText = '?מה זה באנגלית';
+            if(isUppercase) promptText = '?מה האות הקטנה';
+            if(isFirstLetter) promptText = 'נא לסמן את האות שהמילה מתחילה בה';
+            const bigDisplay = isUppercase ? `<span class="big" style="font-size:3em;font-family:'Fredoka One',cursive;color:var(--primary-dark)">${item.emoji}</span>` : 
+                               isFirstLetter ? `<span class="big" style="font-size:2em;font-family:'Fredoka One',cursive;color:var(--primary-dark)" onclick="speak('${item.q}')">${item.q} 🔊</span><div style="font-size:1.5em">${item.emoji}</div>` :
+                               `<span class="big">${item.emoji}</span>`;
+            container.innerHTML=`
+                ${diff.timer?'<div class="quiz-timer" id="quizTimer">⏱️ '+diff.timer+'</div>':''}
+                <div class="quiz-difficulty">${diff.label}</div>
+                <div class="quiz-prompt">${bigDisplay}${hintHtml}${promptText}</div>
+                <div class="quiz-options" id="quizOpts" style="grid-template-columns:${gridCols};direction:ltr"></div>
+                <div class="quiz-score">שאלה ${qi+1}/${numQuestions} | ✅ ${co} | 🪙 ${state.coins}</div>
+                <div class="quiz-feedback" id="quizFb"></div>`;
+            const optsDiv=document.getElementById('quizOpts');
+            opts.forEach(o=>{
+                const b=document.createElement('button');b.className='quiz-btn';b.innerText=o;
+                if(isUppercase || isFirstLetter) b.style.fontSize='1.4em';
+                b.onclick=()=>handleAnswer(o===item.eng, item, b);
+                optsDiv.appendChild(b);
+            });
+            // Speak the word
+            speak(isFirstLetter ? item.q : item.eng);
+        }
+
+        // Start timer if needed
+        if(diff.timer){
+            let timeLeft = diff.timer;
+            quizTimerInterval = setInterval(()=>{
+                if(!quizActive){clearQuizTimer();return;}
+                timeLeft--;
+                const timerEl = document.getElementById('quizTimer');
+                if(timerEl){
+                    timerEl.innerText = `⏱️ ${timeLeft}`;
+                    if(timeLeft <= 3) timerEl.classList.add('urgent');
+                }
+                if(timeLeft <= 0){
+                    clearQuizTimer();
+                    to++;qi++;
+                    const fb = document.getElementById('quizFb');
+                    if(fb) fb.innerHTML=`<span style="color:var(--accent)">⏱️ נגמר הזמן! ${item.eng}</span>`;
+                    document.querySelectorAll('#quizOpts .quiz-btn').forEach(x=>x.disabled=true);
+                    speak('Time is up!');
+                    setTimeout(renderQuestion,1500);
+                }
+            },1000);
+        }
+    }
+
+    function handleAnswer(isCorrect, item, btn){
+        clearQuizTimer();
+        to++;
+        const optsDiv = document.getElementById('quizOpts');
+        if(isCorrect){
+            btn.classList.add('correct');co++;
+            state.totalCorrect++;
+            addXP(2);
+            state.coins += 2 + getCoinBonus();
+            updateUI();
+            showCoinAnimation();
+            playSound('correct');
+            speak(praises[Math.floor(Math.random()*praises.length)]);
+            const bonus = getCoinBonus();
+            const totalCoins = 2 + bonus;
+            document.getElementById('quizFb').innerHTML=`<span style="color:var(--success)">✅ !נכון +${totalCoins} 🪙</span>`;
+        } else {
+            btn.classList.add('wrong');
+            playSound('wrong');
+            speak(tryAgains[Math.floor(Math.random()*tryAgains.length)]);
+            document.getElementById('quizFb').innerHTML=`<span style="color:var(--accent)">❌ ${item.eng}</span>`;
+        }
+        optsDiv.querySelectorAll('.quiz-btn').forEach(x=>x.disabled=true);
+        qi++;
+        setTimeout(renderQuestion,1300);
+    }
+
+    renderQuestion();
+}
+
+// Init UI
+updateUI();
+</script>
+
+<script>
+// === ABC BACKGROUND ===
+function createAbcBg(){
+    const container = document.getElementById('abcBg');
+    if(!container) return;
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const colors = ['#FF1744','#2979FF','#00E676','#FFEA00','#FF9100','#D500F9','#F50057','#00B0FF','#76FF03','#FFD600'];
+    for(let i=0;i<16;i++){
+        const row = document.createElement('div');
+        row.className='abc-row';
+        row.style.animation = `sway-${i%2===0?'right':'left'} ${10+i*0.5}s ease-in-out infinite`;
+        row.style.animationDelay = (i*0.3)+'s';
+        let html = '';
+        const offset = i*4;
+        // Repeat letters enough to fill any screen width
+        for(let j=0;j<60;j++){
+            const l = letters[(j+offset)%26];
+            const color = colors[(j+i*2)%colors.length];
+            html+=`<span style="color:${color};animation-delay:${(j*0.15)}s">${l}</span>`;
+        }
+        row.innerHTML = html;
+        container.appendChild(row);
+    }
+}
+createAbcBg();
+
+// === SPARKLE ON CORRECT ANSWER ===
+function showSparkles(x, y){
+    const emojis = ['✨','⭐','🌟','💫','🎉'];
+    for(let i=0;i<5;i++){
+        const s = document.createElement('div');
+        s.className='sparkle';
+        s.innerText = emojis[Math.floor(Math.random()*emojis.length)];
+        s.style.left = (x + (Math.random()-0.5)*80)+'px';
+        s.style.top = (y + (Math.random()-0.5)*80)+'px';
+        s.style.fontSize = (1+Math.random()*1.5)+'em';
+        document.body.appendChild(s);
+        setTimeout(()=>s.remove(),700);
+    }
+}
+
+// Override showCoinAnimation to also show sparkles
+const _origCoinAnim = showCoinAnimation;
+showCoinAnimation = function(){
+    _origCoinAnim();
+    const x = window.innerWidth/2 + (Math.random()-0.5)*200;
+    const y = window.innerHeight/2;
+    showSparkles(x, y);
+};
+
+// === SOUND EFFECTS (Web Audio API) ===
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playSound(type){
+    try{
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        gain.gain.value = 0.15;
+
+        if(type === 'correct'){
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(523, audioCtx.currentTime); // C5
+            osc.frequency.setValueAtTime(659, audioCtx.currentTime+0.1); // E5
+            osc.frequency.setValueAtTime(784, audioCtx.currentTime+0.2); // G5
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.4);
+            osc.start();osc.stop(audioCtx.currentTime+0.4);
+        } else if(type === 'wrong'){
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime+0.15);
+            gain.gain.value = 0.08;
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.3);
+            osc.start();osc.stop(audioCtx.currentTime+0.3);
+        } else if(type === 'coin'){
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(1100, audioCtx.currentTime+0.08);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.25);
+            osc.start();osc.stop(audioCtx.currentTime+0.25);
+        } else if(type === 'levelup'){
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(554, audioCtx.currentTime+0.15);
+            osc.frequency.setValueAtTime(659, audioCtx.currentTime+0.3);
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime+0.45);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.7);
+            osc.start();osc.stop(audioCtx.currentTime+0.7);
+        }
+    }catch(e){}
+}
+
+// Hook sounds into existing functions
+const _origAddXP = addXP;
+addXP = function(amount){
+    const oldLevel = state.level;
+    _origAddXP(amount);
+    if(state.level > oldLevel) playSound('levelup');
+};
+
+// Resume audio context on first interaction
+document.addEventListener('click', ()=>{ if(audioCtx.state==='suspended') audioCtx.resume(); }, {once:true});
+document.addEventListener('touchstart', ()=>{ if(audioCtx.state==='suspended') audioCtx.resume(); }, {once:true});
+
+// === GROWING CHARACTER ===
+const shopItems = [
+    {id:'bowtie', name:'עניבת פרפר', price:10, img:'shop-bowtie.png'},
+    {id:'glasses', name:'משקפיים', price:15, img:'shop-glasses.png'},
+    {id:'crown', name:'כתר', price:20, img:'shop-crown.png'},
+    {id:'scarf', name:'צעיף קשת', price:20, img:'shop-scarf.png'},
+    {id:'flowers', name:'זר פרחים', price:25, img:'shop-flowers.png'},
+    {id:'wizard', name:'כובע קוסם', price:30, img:'shop-wizard.png'},
+    {id:'pirate', name:'כובע פיראט', price:35, img:'shop-pirate.png'},
+    {id:'cape', name:'גלימת גיבור', price:40, img:'shop-cape.png'},
+    {id:'wings', name:'כנפי מלאך', price:50, img:'shop-wings.png'},
+    {id:'all', name:'⭐ כל האביזרים', price:100, img:'fish-all.png'},
+    {id:'gold', name:'👑 תלבושת זהב', price:300, img:'fish-gold.png'},
+    {id:'diamond', name:'💎 תלבושת יהלום', price:500, img:'fish-diamond.png'},
+];
+
+function getPandaImg(level){
+    const char = localStorage.getItem('abcKidsChar') || playerChar || 'panda';
+    return `char-${char}.png`;
+}
+
+function getEquipOverlay(){
+    const equipped = localStorage.getItem('abcKidsEquipped') || '';
+    if(!equipped) return '';
+    const char = localStorage.getItem('abcKidsChar') || playerChar || 'panda';
+    
+    // For fish - use pre-made images
+    if(char === 'fish'){
+        const fishImages = {crown:'fish-crown.png',glasses:'fish-glasses.png',wizard:'fish-wizard.png',bowtie:'fish-bowtie.png',wings:'fish-wings.png',pirate:'fish-pirate.png',cape:'fish-cape.png',scarf:'fish-scarf.png',flowers:'fish-flowers.png',all:'fish-all.png',gold:'fish-gold.png',diamond:'fish-diamond.png'};
+        if(fishImages[equipped]) return `__REPLACE_IMG__${fishImages[equipped]}`;
+    }
+    // For dog - use pre-made images
+    if(char === 'dog'){
+        const dogImages = {crown:'dog-crown.png',glasses:'dog-glasses.png',wizard:'dog-wizard.png',bowtie:'dog-bowtie.png',wings:'dog-wings.png',cape:'dog-cape.png',flowers:'dog-flowers.png',scarf:'dog-scarf.png',pirate:'dog-pirate.png',all:'dog-all.png'};
+        if(dogImages[equipped]) return `__REPLACE_IMG__${dogImages[equipped]}`;
+    }
+    // For cat - use pre-made images
+    if(char === 'cat'){
+        const catImages = {crown:'cat-crown.png',glasses:'cat-glasses.png',wizard:'cat-wizard.png',bowtie:'cat-bowtie.png',pirate:'cat-pirate.png',flowers:'cat-flowers.png',cape:'cat-cape.png',wings:'cat-wings.png',scarf:'cat-scarf.png',all:'cat-all.png'};
+        if(catImages[equipped]) return `__REPLACE_IMG__${catImages[equipped]}`;
+    }
+    // For panda - use pre-made images
+    if(char === 'panda'){
+        const pandaImages = {crown:'panda-crown.png',glasses:'panda-glasses.png',wizard:'panda-wizard.png',bowtie:'panda-bowtie.png',wings:'panda-wings.png',pirate:'panda-pirate.png',flowers:'panda-flowers.png',cape:'panda-cape.png',scarf:'panda-scarf.png',all:'panda-all.png'};
+        if(pandaImages[equipped]) return `__REPLACE_IMG__${pandaImages[equipped]}`;
+    }
+    // For fox - use pre-made images
+    if(char === 'fox'){
+        const foxImages = {crown:'fox-crown.png',glasses:'fox-glasses.png',wizard:'fox-wizard.png',bowtie:'fox-bowtie.png',wings:'fox-wings.png',scarf:'fox-scarf.png',pirate:'fox-pirate.png',flowers:'fox-flowers.png',cape:'fox-cape.png',all:'fox-all.png'};
+        if(foxImages[equipped]) return `__REPLACE_IMG__${foxImages[equipped]}`;
+    }
+    // For bunny - use pre-made images
+    if(char === 'bunny'){
+        const bunnyImages = {crown:'bunny-crown.png',glasses:'bunny-glasses.png',wizard:'bunny-wizard.png',bowtie:'bunny-bowtie.png',wings:'bunny-wings.png',scarf:'bunny-scarf.png',pirate:'bunny-pirate.png',flowers:'bunny-flowers.png',cape:'bunny-cape.png',all:'bunny-all.png'};
+        if(bunnyImages[equipped]) return `__REPLACE_IMG__${bunnyImages[equipped]}`;
+    }
+    
+    const item = shopItems.find(i=>i.id===equipped);
+    if(!item) return '';
+    const positions = {
+        crown: 'top:-6px;left:50%;transform:translateX(-50%);width:20px',
+        glasses: 'top:35%;left:50%;transform:translate(-50%,-50%);width:28px',
+        wizard: 'top:-10px;left:50%;transform:translateX(-50%);width:24px',
+        bowtie: 'bottom:0px;left:50%;transform:translateX(-50%);width:16px',
+        cape: 'bottom:-2px;right:-4px;width:18px',
+        flowers: 'top:-8px;left:50%;transform:translateX(-50%);width:26px',
+        scarf: 'bottom:-2px;left:50%;transform:translateX(-50%);width:22px',
+        wings: 'top:15%;left:-6px;width:16px',
+        pirate: 'top:-8px;left:50%;transform:translateX(-50%);width:22px',
+    };
+    const pos = positions[equipped] || 'top:0;left:0;width:18px';
+    return `<img src="${item.img}" style="position:absolute;${pos};pointer-events:none;z-index:2">`;
+}
+
+function getPandaSVG(level){
+    const size = Math.min(40 + (level-1)*2, 56);
+    const overlay = getEquipOverlay();
+    
+    // If fish has a pre-made image with accessory, use it directly
+    if(overlay.startsWith('__REPLACE_IMG__')){
+        const imgSrc = overlay.replace('__REPLACE_IMG__','');
+        return `<img src="${imgSrc}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;transition:all 0.3s" alt="Character">`;
+    }
+    
+    return `<div style="position:relative;width:${size}px;height:${size}px;display:inline-block">
+        <img src="${getPandaImg(level)}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;transition:all 0.3s" alt="Character">
+        ${overlay}
+    </div>`;
+}
+
+function updatePanda(){
+    const el = document.getElementById('headerMascot');
+    if(el) el.innerHTML = getPandaSVG(state.level);
+}
+updatePanda();
+
+// Override updateUI to also update panda
+const _origUpdateUI = updateUI;
+updateUI = function(){
+    _origUpdateUI();
+    updatePanda();
+};
+
+// === SHOP SYSTEM ===
+function openCharPopup(){
+    const char = localStorage.getItem('abcKidsChar') || playerChar || 'panda';
+    const equipped = localStorage.getItem('abcKidsEquipped') || '';
+    const content = document.getElementById('charPopupContent');
+    const charNames = {dog:'כלב',fox:'שועל',panda:'פנדה',bunny:'ארנב',cat:'חתול',fish:'דג'};
+    
+    // Check if we have a pre-made image for this char+equip combo
+    const allPreMade = {
+        fish:{crown:'fish-crown.png',glasses:'fish-glasses.png',wizard:'fish-wizard.png',bowtie:'fish-bowtie.png',wings:'fish-wings.png',pirate:'fish-pirate.png',cape:'fish-cape.png',scarf:'fish-scarf.png',flowers:'fish-flowers.png',all:'fish-all.png',gold:'fish-gold.png',diamond:'fish-diamond.png'},
+        dog:{crown:'dog-crown.png',glasses:'dog-glasses.png',wizard:'dog-wizard.png',bowtie:'dog-bowtie.png',wings:'dog-wings.png',cape:'dog-cape.png',flowers:'dog-flowers.png',scarf:'dog-scarf.png',pirate:'dog-pirate.png',all:'dog-all.png'},
+        cat:{crown:'cat-crown.png',glasses:'cat-glasses.png',wizard:'cat-wizard.png',bowtie:'cat-bowtie.png',pirate:'cat-pirate.png',flowers:'cat-flowers.png',cape:'cat-cape.png',wings:'cat-wings.png',scarf:'cat-scarf.png',all:'cat-all.png'},
+        panda:{crown:'panda-crown.png',glasses:'panda-glasses.png',wizard:'panda-wizard.png',bowtie:'panda-bowtie.png',wings:'panda-wings.png',pirate:'panda-pirate.png',flowers:'panda-flowers.png',cape:'panda-cape.png',scarf:'panda-scarf.png',all:'panda-all.png'},
+        fox:{crown:'fox-crown.png',glasses:'fox-glasses.png',wizard:'fox-wizard.png',bowtie:'fox-bowtie.png',wings:'fox-wings.png',scarf:'fox-scarf.png',pirate:'fox-pirate.png',flowers:'fox-flowers.png',cape:'fox-cape.png',all:'fox-all.png'},
+        bunny:{crown:'bunny-crown.png',glasses:'bunny-glasses.png',wizard:'bunny-wizard.png',bowtie:'bunny-bowtie.png',wings:'bunny-wings.png',scarf:'bunny-scarf.png',pirate:'bunny-pirate.png',flowers:'bunny-flowers.png',cape:'bunny-cape.png',all:'bunny-all.png'}
+    };
+    
+    let imgSrc = `char-${char}.png`;
+    if(equipped && allPreMade[char] && allPreMade[char][equipped]){
+        imgSrc = `${allPreMade[char][equipped]}`;
+    }
+    
+    content.innerHTML = `<img class="char-big" src="${imgSrc}" alt="${charNames[char]}">`;
+    document.getElementById('charPopupName').innerText = charNames[char] || char;
+    document.getElementById('charPopupOverlay').classList.add('show');
+}
+
+function closeCharPopup(){
+    document.getElementById('charPopupOverlay').classList.remove('show');
+}
+
+function getOwnedItems(){return JSON.parse(localStorage.getItem('abcKidsOwned')||'[]');}
+function getEquippedItem(){return localStorage.getItem('abcKidsEquipped')||'';}
+
+function openShop(){
+    document.getElementById('shopOverlay').classList.add('show');
+    document.getElementById('shopCoinsVal').innerText = state.coins;
+    renderShop();
+}
+function closeShop(){document.getElementById('shopOverlay').classList.remove('show');}
+
+function renderShop(){
+    const grid = document.getElementById('shopGrid');
+    const owned = getOwnedItems();
+    const equipped = getEquippedItem();
+    grid.innerHTML='';
+    shopItems.forEach(item=>{
+        const isOwned = owned.includes(item.id);
+        const isEquipped = equipped === item.id;
+        const div = document.createElement('div');
+        div.className = 'shop-item' + (isEquipped?' equipped':(isOwned?' owned':''));
+        div.innerHTML = `
+            <img src="${item.img}" alt="${item.name}">
+            <div class="shop-item-name">${item.name}</div>
+            ${isEquipped?'<div class="shop-item-status">✓ לבוש</div>':(isOwned?'<div class="shop-item-status">לחצו ללבוש</div>':`<div class="shop-item-price">🪙 ${item.price}</div>`)}
+        `;
+        div.onclick = ()=> buyOrEquip(item.id, item.price);
+        grid.appendChild(div);
+    });
+}
+
+function buyOrEquip(itemId, price){
+    const owned = getOwnedItems();
+    const equipped = getEquippedItem();
+    if(owned.includes(itemId)){
+        // Equip/unequip
+        if(equipped === itemId){
+            localStorage.setItem('abcKidsEquipped','');
+        } else {
+            localStorage.setItem('abcKidsEquipped', itemId);
+        }
+        renderShop();
+        updatePanda();
+    } else {
+        // Buy
+        if(state.coins >= price){
+            state.coins -= price;
+            owned.push(itemId);
+            localStorage.setItem('abcKidsOwned', JSON.stringify(owned));
+            localStorage.setItem('abcKidsEquipped', itemId);
+            updateUI();
+            updatePanda();
+            playSound('coin');
+            showToast('🛍️',`!קניתם ${shopItems.find(i=>i.id===itemId).name}`);
+            renderShop();
+            document.getElementById('shopCoinsVal').innerText = state.coins;
+        } else {
+            showToast('😢','!אין מספיק מטבעות');
+        }
+    }
+}
+</script>

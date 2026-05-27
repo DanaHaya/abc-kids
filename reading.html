@@ -1,0 +1,555 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>משחק קריאה - ABC Kids</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Rubik:wght@400;600;700&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{--primary:#4A90D9;--success:#4CD964;--accent:#FF6B9D;--warning:#FFCC02;--orange:#FF9500;--radius:20px}
+        body{font-family:'Rubik',sans-serif;background:linear-gradient(135deg,#E8F4FD,#F0E6FF,#FFF0F5);min-height:100vh;padding:12px;padding-bottom:80px}
+        .header{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);border-radius:var(--radius);padding:12px 16px;margin-bottom:12px;max-width:500px;margin-left:auto;margin-right:auto}
+        .header h1{font-family:'Fredoka One',cursive;font-size:1.2em;color:#2E6BAD}
+        .header a{text-decoration:none;font-size:1.3em}
+        .level-tabs{display:flex;gap:6px;justify-content:center;max-width:500px;margin:0 auto 12px;flex-wrap:wrap}
+        .level-tab{background:rgba(255,255,255,0.8);border:2px solid #ddd;border-radius:14px;padding:8px 14px;font-family:'Fredoka One',cursive;font-size:0.8em;cursor:pointer;transition:all 0.2s}
+        .level-tab.active{background:var(--primary);color:white;border-color:var(--primary)}
+        .level-tab:active{transform:scale(0.95)}
+        .game-area{max-width:500px;margin:0 auto;background:rgba(255,255,255,0.92);backdrop-filter:blur(10px);border-radius:var(--radius);padding:20px;min-height:300px}
+        .game-title{font-family:'Fredoka One',cursive;font-size:1.1em;color:#333;text-align:center;margin-bottom:14px}
+        /* Slow mode button */
+        .slow-btn{background:var(--success);color:white;border:none;border-radius:14px;width:40px;height:40px;font-size:1.2em;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .slow-btn.active{background:var(--orange)}
+        .replay-btn{background:var(--primary);color:white;border:none;border-radius:14px;width:40px;height:40px;font-size:1.2em;cursor:pointer;display:flex;align-items:center;justify-content:center}
+        .replay-btn:active{transform:scale(0.9)}
+        /* Word highlighting */
+        .sentence{font-family:'Fredoka One',cursive;font-size:1.3em;line-height:2;text-align:center;direction:ltr;margin:12px 0}
+        .sentence .word{cursor:pointer;padding:2px 4px;border-radius:6px;transition:all 0.2s;display:inline-block}
+        .sentence .word:hover{background:#E3F2FD}
+        .sentence .word.highlight{background:var(--warning);color:#333;transform:scale(1.1)}
+        /* Level 1 - Matching */
+        .match-images{display:flex;gap:10px;justify-content:center;margin:16px 0;flex-wrap:wrap}
+        .match-img{width:90px;height:90px;background:#F8FAFF;border:3px solid #EEF2FF;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:3em;cursor:pointer;transition:all 0.2s}
+        .match-img:active{transform:scale(0.95)}
+        .match-img.correct{border-color:var(--success);background:#E8FFE8}
+        .match-img.wrong{border-color:var(--accent);animation:shake 0.3s}
+        .match-word{font-family:'Fredoka One',cursive;font-size:2em;text-align:center;color:var(--primary);margin:10px 0;direction:ltr}
+        /* Level 2 - Sentence puzzle */
+        .puzzle-img{font-size:4em;text-align:center;margin:10px 0}
+        .puzzle-hint{text-align:center;color:#888;font-size:0.9em;margin-bottom:10px}
+        .puzzle-slots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;min-height:44px;margin:10px 0;padding:8px;background:#F8FAFF;border-radius:12px;border:2px dashed #ddd;direction:ltr}
+        .puzzle-slot{background:white;border:2px solid #E8F0FE;border-radius:10px;padding:8px 12px;font-family:'Fredoka One',cursive;font-size:0.95em;color:var(--primary)}
+        .puzzle-words{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0;direction:ltr}
+        .puzzle-word{background:var(--primary);color:white;border:none;border-radius:10px;padding:8px 14px;font-family:'Fredoka One',cursive;font-size:0.9em;cursor:pointer;transition:all 0.2s}
+        .puzzle-word:active{transform:scale(0.95)}
+        .puzzle-word.used{opacity:0.3;pointer-events:none}
+        /* Level 3 - Reading comprehension */
+        .story-box{background:#F8FAFF;border-radius:12px;padding:14px;margin:10px 0;direction:ltr}
+        .story-text{font-family:'Fredoka One',cursive;font-size:1.1em;line-height:1.8;color:#333}
+        .translate-btn{background:linear-gradient(135deg,#FFF3E0,#FFFDE7);border:2px solid #FFE082;border-radius:10px;padding:8px 14px;font-size:0.8em;cursor:pointer;margin:8px auto;display:block}
+        .options{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+        .option-btn{background:white;border:2px solid #E8F0FE;border-radius:12px;padding:12px;font-family:'Fredoka One',cursive;font-size:0.95em;cursor:pointer;transition:all 0.2s;text-align:center;direction:ltr}
+        .option-btn:active{transform:scale(0.97)}
+        .option-btn.correct{background:var(--success);color:white;border-color:var(--success)}
+        .option-btn.wrong{background:var(--accent);color:white;border-color:var(--accent)}
+        /* Level 4 - Fill in blanks */
+        .paragraph{font-family:'Fredoka One',cursive;font-size:1em;line-height:2.2;direction:ltr;text-align:left}
+        .blank{display:inline-block;min-width:60px;border-bottom:3px solid var(--primary);padding:2px 8px;margin:0 3px;text-align:center;color:var(--success);cursor:pointer}
+        .blank.empty{color:transparent}
+        .word-bank{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:12px 0;direction:ltr}
+        .bank-word{background:var(--primary);color:white;border:none;border-radius:10px;padding:6px 12px;font-family:'Fredoka One',cursive;font-size:0.85em;cursor:pointer;transition:all 0.2s}
+        .bank-word:active{transform:scale(0.95)}
+        .bank-word.used{opacity:0.3;pointer-events:none}
+        .tooltip{position:relative}
+        .tooltip:hover::after{content:attr(data-heb);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#333;color:white;padding:4px 8px;border-radius:6px;font-size:0.7em;white-space:nowrap;direction:rtl}
+        /* Feedback */
+        .feedback{text-align:center;font-family:'Fredoka One',cursive;font-size:1.1em;margin:10px 0;min-height:30px}
+        .feedback.success{color:var(--success)}
+        .feedback.error{color:var(--accent)}
+        .next-btn{background:linear-gradient(135deg,var(--primary),#7BB3E0);color:white;border:none;border-radius:14px;padding:12px 24px;font-family:'Fredoka One',cursive;font-size:1em;cursor:pointer;display:block;margin:12px auto}
+        .next-btn:active{transform:scale(0.95)}
+        .progress{text-align:center;font-size:0.75em;color:#999;margin-top:8px}
+        .coin-fly{position:fixed;z-index:9996;pointer-events:none;font-size:1.8em;transition:none}
+        @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+        @keyframes pop{from{transform:scale(0.8);opacity:0}to{transform:scale(1);opacity:1}}
+        .pop{animation:pop 0.3s ease}
+    </style>
+</head>
+<body>
+<div class="header">
+    <a href="index.html">🏠</a>
+    <h1>📖 משחק קריאה</h1>
+    <div style="display:flex;gap:6px;align-items:center">
+        <span id="readingCoins" style="font-family:'Fredoka One',cursive;font-size:0.85em;color:#DAA520;background:linear-gradient(135deg,#FFF8E1,#FFFDE7);padding:4px 10px;border-radius:12px;border:2px solid #FFE082;transition:transform 0.2s">🪙 <span id="rcVal">0</span></span>
+        <button class="replay-btn" onclick="replayAudio()">🔊</button>
+        <button class="slow-btn" id="slowBtn" onclick="toggleSlow()">🐢</button>
+    </div>
+</div>
+<div class="level-tabs">
+    <div class="level-tab active" onclick="setLevel(1)">רמה 1<br>צלילים</div>
+    <div class="level-tab" onclick="setLevel(2)">רמה 2<br>משפטים</div>
+    <div class="level-tab" onclick="setLevel(3)">רמה 3<br>הבנה</div>
+    <div class="level-tab" onclick="setLevel(4)">רמה 4<br>סיפור</div>
+</div>
+<div class="game-area" id="gameArea"></div>
+
+<script>
+let currentLevel = 1;
+let slowMode = false;
+let questionIdx = 0;
+let lastReplayText = '';
+let lastReplayElId = '';
+
+function replayAudio(){
+    if(lastReplayText && lastReplayElId){
+        highlightSentence(lastReplayText, lastReplayElId);
+    } else if(lastReplayText){
+        speak(lastReplayText);
+    }
+}
+
+// === SHARED STATE ===
+let state = JSON.parse(localStorage.getItem('abcKidsState')) || {xp:0,coins:0,level:1,streak:0,totalCorrect:0};
+function saveState(){localStorage.setItem('abcKidsState',JSON.stringify(state));}
+function updateCoinsDisplay(){document.getElementById('rcVal').innerText = state.coins;}
+function getCoinBonus(){
+    const equipped = localStorage.getItem('abcKidsEquipped') || '';
+    if(equipped === 'diamond') return 2; // 4 מטבעות סה"כ
+    if(equipped === 'gold') return 1;    // 3 מטבעות סה"כ
+    return 0;
+}
+
+function addXPandCoins(){
+    state.xp += 2;
+    state.coins += 2 + getCoinBonus();
+    state.totalCorrect++;
+    state.level = Math.min(Math.floor(state.xp / 20) + 1, 10);
+    saveState();
+    updateCoinsDisplay();
+    showCoinFly();
+}
+function showCoinFly(){
+    const counter = document.getElementById('readingCoins');
+    const rect = counter.getBoundingClientRect();
+    for(let i=0;i<3;i++){
+        setTimeout(()=>{
+            const coin = document.createElement('div');
+            coin.className='coin-fly';
+            coin.innerText='🪙';
+            const startX = window.innerWidth/2 + (Math.random()-0.5)*100;
+            const startY = window.innerHeight/2;
+            coin.style.left=startX+'px';coin.style.top=startY+'px';
+            coin.style.transform='scale(1.3)';coin.style.opacity='1';
+            document.body.appendChild(coin);
+            const duration=600;const start=performance.now();
+            function animate(now){
+                const p=Math.min((now-start)/duration,1);
+                const ease=1-Math.pow(1-p,3);
+                coin.style.left=(startX+(rect.left-startX)*ease)+'px';
+                coin.style.top=(startY+(rect.top-startY)*ease)+'px';
+                coin.style.transform=`scale(${1.3-ease})`;
+                coin.style.opacity=String(1-p*0.3);
+                if(p<1) requestAnimationFrame(animate);
+                else{counter.style.transform='scale(1.2)';setTimeout(()=>counter.style.transform='',200);coin.remove();}
+            }
+            requestAnimationFrame(animate);
+        },i*120);
+    }
+}
+
+// === SPEECH ===
+const praises = ['Great job!','Excellent!','Amazing!','Well done!','Perfect!','Awesome!','Fantastic!','Super!','You are a star!','Wonderful!'];
+function randomPraise(){return praises[Math.floor(Math.random()*praises.length)];}
+
+// בדיקה אם onboundary נתמך (לא עובד בפלאפון)
+let _boundarySupported = null;
+function checkBoundarySupport(cb){
+    if(_boundarySupported !== null){cb(_boundarySupported);return;}
+    const test = new SpeechSynthesisUtterance('test');
+    let fired = false;
+    test.onboundary = ()=>{ fired = true; };
+    test.onend = ()=>{ _boundarySupported = fired; cb(_boundarySupported); };
+    test.volume = 0; // שקט - רק לבדיקה
+    window.speechSynthesis.speak(test);
+}
+
+// סימון מילים לפי טיימר (fallback לפלאפון)
+let _highlightTimers = [];
+function clearHighlightTimers(){ _highlightTimers.forEach(t=>clearTimeout(t)); _highlightTimers=[]; }
+
+function highlightByTimer(text, elId, rate){
+    clearHighlightTimers();
+    const words = document.querySelectorAll(`#${elId} .word`);
+    if(!words.length) return;
+    // זמן ממוצע למילה: ~300ms במהירות רגילה, ~500ms במצב איטי
+    const msPerChar = rate <= 0.65 ? 120 : 75;
+    let delay = 300; // השהיה ראשונית
+    words.forEach((w)=>{
+        const wordLen = w.textContent.replace(/[^a-zA-Z]/g,'').length;
+        const duration = Math.max(200, wordLen * msPerChar);
+        const t = setTimeout(()=>{
+            words.forEach(x=>x.classList.remove('highlight'));
+            w.classList.add('highlight');
+        }, delay);
+        _highlightTimers.push(t);
+        delay += duration;
+    });
+    // הסר סימון בסוף
+    const t = setTimeout(()=>{ words.forEach(x=>x.classList.remove('highlight')); }, delay+200);
+    _highlightTimers.push(t);
+}
+
+function speak(text, onEnd, highlightCb){
+    if(!('speechSynthesis' in window)) return;
+    clearHighlightTimers();
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    const rate = slowMode ? 0.6 : 1.0;
+    u.lang='en-US'; u.rate = rate; u.pitch=1.1;
+    if(onEnd) u.onend = onEnd;
+    if(highlightCb){
+        // נסה onboundary קודם, אם לא עובד - fallback לטיימר
+        let boundaryFired = false;
+        u.onboundary = (e)=>{
+            if(e.name==='word'){
+                boundaryFired = true;
+                clearHighlightTimers(); // בטל טיימרים אם onboundary עובד
+                highlightCb(e.charIndex, e.charLength);
+            }
+        };
+        // הפעל טיימר תמיד - יבוטל אם onboundary יעבוד
+        // מצא את ה-elId מה-highlightCb context
+        if(u._elId) highlightByTimer(text, u._elId, rate);
+    }
+    window.speechSynthesis.speak(u);
+}
+
+function speakWord(word){
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang='en-US'; u.rate = slowMode ? 0.5 : 0.8; u.pitch=1.1;
+    window.speechSynthesis.speak(u);
+}
+
+function toggleSlow(){
+    slowMode = !slowMode;
+    document.getElementById('slowBtn').classList.toggle('active', slowMode);
+}
+
+// === LEVEL DATA ===
+const level1Data = [
+    {word:'cat',emoji:'🐱',options:['🐱','🐶','🐟']},
+    {word:'pig',emoji:'🐷',options:['🐰','🐷','🐸']},
+    {word:'fox',emoji:'🦊',options:['🦊','🐱','🐻']},
+    {word:'bed',emoji:'🛏️',options:['🪑','🛏️','🚪']},
+    {word:'sun',emoji:'☀️',options:['🌙','⭐','☀️']},
+    {word:'hat',emoji:'🎩',options:['👟','🎩','👓']},
+    {word:'dog',emoji:'🐶',options:['🐶','🐱','🐰']},
+    {word:'cup',emoji:'☕',options:['🍽️','☕','🥛']},
+    {word:'bus',emoji:'🚌',options:['🚗','🚌','✈️']},
+    {word:'pen',emoji:'🖊️',options:['📖','🖊️','✂️']},
+    {word:'egg',emoji:'🥚',options:['🥚','🍎','🧀']},
+    {word:'leg',emoji:'🦵',options:['✋','🦵','👂']},
+    {word:'bag',emoji:'🎒',options:['🎒','👜','📦']},
+    {word:'map',emoji:'🗺️',options:['📖','🗺️','📰']},
+    {word:'net',emoji:'🥅',options:['🥅','🧺','🪣']},
+    {word:'nut',emoji:'🥜',options:['🍎','🥜','🍊']},
+    {word:'van',emoji:'🚐',options:['🚐','🚗','🚌']},
+    {word:'jam',emoji:'🍯',options:['🍯','🧈','🥛']},
+    {word:'mop',emoji:'🧹',options:['🧹','🪣','🧽']},
+    {word:'pot',emoji:'🍲',options:['🍲','🥘','🍳']},
+];
+
+const level2Data = [
+    {sentence:'The cat is big.',words:['The','cat','is','big.'],heb:'החתול גדול.',emoji:'🐱'},
+    {sentence:'I see a red van.',words:['I','see','a','red','van.'],heb:'אני רואה ואן אדום.',emoji:'🚐'},
+    {sentence:'A hot pot.',words:['A','hot','pot.'],heb:'סיר חם.',emoji:'🍲'},
+    {sentence:'The dog can run.',words:['The','dog','can','run.'],heb:'הכלב יכול לרוץ.',emoji:'🐶'},
+    {sentence:'I have a big hat.',words:['I','have','a','big','hat.'],heb:'יש לי כובע גדול.',emoji:'🎩'},
+    {sentence:'The sun is hot.',words:['The','sun','is','hot.'],heb:'השמש חמה.',emoji:'☀️'},
+    {sentence:'I like my bed.',words:['I','like','my','bed.'],heb:'אני אוהב את המיטה שלי.',emoji:'🛏️'},
+    {sentence:'The fish can swim.',words:['The','fish','can','swim.'],heb:'הדג יכול לשחות.',emoji:'🐟'},
+    {sentence:'I see a big bus.',words:['I','see','a','big','bus.'],heb:'אני רואה אוטובוס גדול.',emoji:'🚌'},
+    {sentence:'The hen has an egg.',words:['The','hen','has','an','egg.'],heb:'לתרנגולת יש ביצה.',emoji:'🐔'},
+    {sentence:'My bag is red.',words:['My','bag','is','red.'],heb:'התיק שלי אדום.',emoji:'🎒'},
+    {sentence:'I can see a fox.',words:['I','can','see','a','fox.'],heb:'אני יכול לראות שועל.',emoji:'🦊'},
+    {sentence:'The man has a pen.',words:['The','man','has','a','pen.'],heb:'לאיש יש עט.',emoji:'🖊️'},
+    {sentence:'A fat cat sat.',words:['A','fat','cat','sat.'],heb:'חתול שמן ישב.',emoji:'🐱'},
+    {sentence:'I like the sun.',words:['I','like','the','sun.'],heb:'אני אוהב את השמש.',emoji:'☀️'},
+];
+
+const level3Data = [
+    {story:'Ben has a blue kite. The kite flies high in the sky.',storyHeb:'לבן יש עפיפון כחול. העפיפון עף גבוה בשמיים.',question:'What color is Ben\'s kite?',questionHeb:'באיזה צבע העפיפון של בן?',options:['Red','Blue','Green'],answer:1},
+    {story:'The cat sat on a mat. It is a fat cat.',storyHeb:'החתול ישב על שטיחון. הוא חתול שמן.',question:'Where did the cat sit?',questionHeb:'איפה ישב החתול?',options:['On a bed','On a mat','On a hat'],answer:1},
+    {story:'Sam has a red bag. He puts his books in the bag.',storyHeb:'לסם יש תיק אדום. הוא שם את הספרים בתיק.',question:'What does Sam put in his bag?',questionHeb:'מה סם שם בתיק?',options:['Toys','Food','Books'],answer:2},
+    {story:'The dog likes to run. It runs in the park every day.',storyHeb:'הכלב אוהב לרוץ. הוא רץ בפארק כל יום.',question:'Where does the dog run?',questionHeb:'איפה הכלב רץ?',options:['At home','In the park','At school'],answer:1},
+    {story:'Mom made a big cake. The cake is for my birthday.',storyHeb:'אמא הכינה עוגה גדולה. העוגה ליום ההולדת שלי.',question:'Who made the cake?',questionHeb:'מי הכין את העוגה?',options:['Dad','Mom','Sister'],answer:1},
+    {story:'I have a pet fish. The fish is orange and small.',storyHeb:'יש לי דג חיות מחמד. הדג כתום וקטן.',question:'What color is the fish?',questionHeb:'באיזה צבע הדג?',options:['Blue','Orange','Red'],answer:1},
+    {story:'Tom went to bed at eight. He was very tired.',storyHeb:'טום הלך לישון בשמונה. הוא היה מאוד עייף.',question:'Why did Tom go to bed?',questionHeb:'למה טום הלך לישון?',options:['He was happy','He was tired','He was hungry'],answer:1},
+    {story:'The bird built a nest in the tree. It has three eggs.',storyHeb:'הציפור בנתה קן בעץ. יש בו שלוש ביצים.',question:'How many eggs are in the nest?',questionHeb:'כמה ביצים בקן?',options:['Two','Three','Four'],answer:1},
+    {story:'It is raining today. I need my umbrella.',storyHeb:'יורד גשם היום. אני צריך את המטריה שלי.',question:'What do I need?',questionHeb:'מה אני צריך?',options:['A hat','An umbrella','A coat'],answer:1},
+    {story:'The rabbit is white. It likes to eat carrots.',storyHeb:'הארנב לבן. הוא אוהב לאכול גזרים.',question:'What does the rabbit eat?',questionHeb:'מה הארנב אוכל?',options:['Apples','Carrots','Bread'],answer:1},
+    {story:'My sister has a doll. The doll has a pink dress.',storyHeb:'לאחות שלי יש בובה. לבובה יש שמלה ורודה.',question:'What color is the dress?',questionHeb:'באיזה צבע השמלה?',options:['Pink','Blue','Yellow'],answer:0},
+    {story:'We go to school by bus. The bus is yellow.',storyHeb:'אנחנו נוסעים לבית הספר באוטובוס. האוטובוס צהוב.',question:'How do we go to school?',questionHeb:'איך אנחנו מגיעים לבית הספר?',options:['By car','By bus','By bike'],answer:1},
+    {story:'Dad is cooking dinner. He is making pasta.',storyHeb:'אבא מבשל ארוחת ערב. הוא מכין פסטה.',question:'What is Dad making?',questionHeb:'מה אבא מכין?',options:['Pizza','Pasta','Soup'],answer:1},
+    {story:'The frog jumped into the pond. The water is cold.',storyHeb:'הצפרדע קפצה לבריכה. המים קרים.',question:'Where did the frog jump?',questionHeb:'לאן הצפרדע קפצה?',options:['Into a box','Into the pond','Into a tree'],answer:1},
+    {story:'I like ice cream. My favorite flavor is chocolate.',storyHeb:'אני אוהב גלידה. הטעם האהוב עלי הוא שוקולד.',question:'What is my favorite flavor?',questionHeb:'מה הטעם האהוב עלי?',options:['Vanilla','Strawberry','Chocolate'],answer:2},
+];
+
+const level4Data = [
+    {text:'The little bird built a [nest] in the tree. She laid three small [eggs]. Soon, the babies hatched and started to [sing]. They were very [happy].',blanks:['nest','eggs','sing','happy'],bank:['nest','eggs','sing','happy','sad','run','big','house'],hebSentences:['הציפור הקטנה בנתה קן בעץ.','היא הטילה שלוש ביצים קטנות.','בקרוב, התינוקות בקעו והתחילו לשיר.','הם היו מאוד שמחים.']},
+    {text:'Tom went to the [park] with his [dog]. They played with a [ball]. The dog was very [fast].',blanks:['park','dog','ball','fast'],bank:['park','dog','ball','fast','cat','slow','home','book'],hebSentences:['טום הלך לפארק עם הכלב שלו.','הם שיחקו עם כדור.','הכלב היה מאוד מהיר.','']},
+    {text:'The [sun] is shining today. I put on my [hat] and went to the [beach]. The water was [blue] and warm.',blanks:['sun','hat','beach','blue'],bank:['sun','hat','beach','blue','moon','coat','school','red'],hebSentences:['השמש זורחת היום.','שמתי את הכובע שלי והלכתי לחוף.','המים היו כחולים וחמים.','']},
+    {text:'My [mom] made cookies. They smell so [good]. I ate [two] cookies. They were [sweet].',blanks:['mom','good','two','sweet'],bank:['mom','good','two','sweet','dad','bad','ten','sour'],hebSentences:['אמא שלי הכינה עוגיות.','הן מריחות כל כך טוב.','אכלתי שתי עוגיות.','הן היו מתוקות.']},
+    {text:'The [cat] climbed up the [tree]. It was scared to come [down]. Dad helped the cat get [home].',blanks:['cat','tree','down','home'],bank:['cat','tree','down','home','dog','rock','up','school'],hebSentences:['החתול טיפס על העץ.','הוא פחד לרדת.','אבא עזר לחתול להגיע הביתה.','']},
+    {text:'I [love] my school. My [teacher] is very nice. We [read] books every day. Learning is [fun].',blanks:['love','teacher','read','fun'],bank:['love','teacher','read','fun','hate','doctor','eat','sad'],hebSentences:['אני אוהב את בית הספר שלי.','המורה שלי מאוד נחמדה.','אנחנו קוראים ספרים כל יום.','ללמוד זה כיף.']},
+    {text:'The [rabbit] lives in a hole. It has long [ears] and a short [tail]. It likes to [jump] around.',blanks:['rabbit','ears','tail','jump'],bank:['rabbit','ears','tail','jump','fox','eyes','nose','sleep'],hebSentences:['הארנב גר בחור.','יש לו אוזניים ארוכות וזנב קצר.','הוא אוהב לקפוץ.','']},
+    {text:'It is [winter] now. The [snow] is white. I wear my warm [coat]. I make a [snowman].',blanks:['winter','snow','coat','snowman'],bank:['winter','snow','coat','snowman','summer','rain','hat','sandcastle'],hebSentences:['עכשיו חורף.','השלג לבן.','אני לובש את המעיל החם שלי.','אני בונה איש שלג.']},
+    {text:'The [frog] sat on a [log]. It saw a [fly] and caught it with its [tongue].',blanks:['frog','log','fly','tongue'],bank:['frog','log','fly','tongue','fish','rock','bee','tail'],hebSentences:['הצפרדע ישבה על בול עץ.','היא ראתה זבוב ותפסה אותו עם הלשון.','','']},
+    {text:'I have a [bike]. It is [green]. I ride it to the [shop]. I buy some [milk].',blanks:['bike','green','shop','milk'],bank:['bike','green','shop','milk','car','blue','park','juice'],hebSentences:['יש לי אופניים.','הם ירוקים.','אני רוכב לחנות.','אני קונה חלב.']},
+    {text:'The [moon] comes out at [night]. The stars [shine] in the sky. I go to [sleep].',blanks:['moon','night','shine','sleep'],bank:['moon','night','shine','sleep','sun','day','hide','run'],hebSentences:['הירח יוצא בלילה.','הכוכבים זורחים בשמיים.','אני הולך לישון.','']},
+    {text:'My [friend] came to play. We built a [tower] with blocks. It was very [tall]. Then it fell [down].',blanks:['friend','tower','tall','down'],bank:['friend','tower','tall','down','brother','house','small','up'],hebSentences:['החבר שלי בא לשחק.','בנינו מגדל מקוביות.','הוא היה מאוד גבוה.','אז הוא נפל.']},
+    {text:'The [duck] swam in the [pond]. It found some [bread]. The duck was [happy].',blanks:['duck','pond','bread','happy'],bank:['duck','pond','bread','happy','fish','sea','cake','sad'],hebSentences:['הברווז שחה בבריכה.','הוא מצא לחם.','הברווז היה שמח.','']},
+    {text:'I [brush] my teeth every morning. I use [water] and paste. My teeth are [clean] and white.',blanks:['brush','water','clean'],bank:['brush','water','clean','wash','milk','dirty','comb','juice'],hebSentences:['אני מצחצח שיניים כל בוקר.','אני משתמש במים ומשחה.','השיניים שלי נקיות ולבנות.','']},
+    {text:'The [lion] is the king of animals. It has a big [mane]. It can [roar] very loud.',blanks:['lion','mane','roar'],bank:['lion','mane','roar','tiger','tail','bark','cat','sing'],hebSentences:['האריה הוא מלך החיות.','יש לו רעמה גדולה.','הוא יכול לשאוג מאוד חזק.','']},
+];
+
+// === RENDER LEVELS ===
+function setLevel(lvl){
+    currentLevel = lvl;
+    questionIdx = 0;
+    document.querySelectorAll('.level-tab').forEach((t,i)=>t.classList.toggle('active',i===lvl-1));
+    render();
+}
+
+function render(){
+    const area = document.getElementById('gameArea');
+    const dataMap = [level1Data, level2Data, level3Data, level4Data];
+    const currentData = dataMap[currentLevel-1];
+    // הגענו לסוף - הצג מסך סיום
+    if(questionIdx >= currentData.length){
+        showLevelComplete(area, currentData.length);
+        return;
+    }
+    if(currentLevel===1) renderLevel1(area);
+    else if(currentLevel===2) renderLevel2(area);
+    else if(currentLevel===3) renderLevel3(area);
+    else renderLevel4(area);
+}
+
+function showLevelComplete(area, total){
+    clearHighlightTimers();
+    window.speechSynthesis.cancel();
+    speak('Congratulations! You finished all the questions!');
+    area.innerHTML=`
+        <div style="text-align:center;padding:20px">
+            <div style="font-size:4em;margin-bottom:10px">🏆</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:1.4em;color:var(--primary-dark);margin-bottom:8px">!סיימתם את כל השאלות</div>
+            <div style="font-size:0.9em;color:#888;margin-bottom:20px">${total} / ${total} שאלות ✅</div>
+            <button class="next-btn" onclick="questionIdx=0;render()" style="margin:6px auto;display:block">🔄 שוב מההתחלה</button>
+        </div>`;
+}
+
+// LEVEL 1
+function renderLevel1(area){
+    const d = level1Data[questionIdx];
+    const shuffled = [...d.options].sort(()=>Math.random()-0.5);
+    area.innerHTML=`
+        <div class="game-title">🔊 הקשיבו ובחרו את התמונה הנכונה</div>
+        <div class="match-word" onclick="speakWord('${d.word}')">${d.word} 🔊</div>
+        <div class="match-images">${shuffled.map(e=>`<div class="match-img" onclick="checkMatch1(this,'${e}','${d.emoji}')">${e}</div>`).join('')}</div>
+        <div class="feedback" id="fb"></div>
+        <div class="progress">${questionIdx+1} / ${level1Data.length}</div>`;
+    speakWord(d.word);
+    lastReplayText = d.word; lastReplayElId = '';
+}
+
+function checkMatch1(el, picked, correct){
+    if(picked===correct){
+        el.classList.add('correct');
+        document.getElementById('fb').innerHTML='<span class="success">!מצוין ✅</span>';
+        speak(randomPraise());
+        addXPandCoins();
+        setTimeout(()=>{questionIdx++;render();},1500);
+    } else {
+        el.classList.add('wrong');
+        document.getElementById('fb').innerHTML='<span class="error">נסה שוב</span>';
+        speak('Try again!');
+        setTimeout(()=>el.classList.remove('wrong'),400);
+    }
+}
+
+// LEVEL 2
+function renderLevel2(area){
+    const d = level2Data[questionIdx];
+    const shuffled = [...d.words].sort(()=>Math.random()-0.5);
+    area.innerHTML=`
+        <div class="game-title">🧩 סדרו את המילים למשפט</div>
+        <div class="puzzle-img">${d.emoji}</div>
+        <div class="puzzle-hint">${d.heb}</div>
+        <div class="puzzle-slots" id="slots"></div>
+        <div class="puzzle-words" id="pwords">${shuffled.map((w,i)=>`<button class="puzzle-word" onclick="pickWord2(this,'${w}')">${w}</button>`).join('')}</div>
+        <div class="feedback" id="fb"></div>
+        <div class="progress">${questionIdx+1} / ${level2Data.length}</div>`;
+}
+
+let currentSentence2=[];
+function pickWord2(btn, word){
+    btn.classList.add('used');
+    currentSentence2.push(word);
+    const d = level2Data[questionIdx % level2Data.length];
+    document.getElementById('slots').innerHTML = currentSentence2.map(w=>`<span class="puzzle-slot">${w}</span>`).join('');
+    speakWord(word);
+    if(currentSentence2.length === d.words.length){
+        if(currentSentence2.join(' ')===d.words.join(' ')){
+            document.getElementById('fb').innerHTML='<span class="success">!מושלם ✅</span>';
+            speak(randomPraise() + ' ' + d.sentence);
+            addXPandCoins();
+            setTimeout(()=>{currentSentence2=[];questionIdx++;render();},2500);
+        } else {
+            document.getElementById('fb').innerHTML='<span class="error">לא בדיוק, נסו שוב</span>';
+            speak(['Not quite!','Try again!','Almost!','Oops!'][Math.floor(Math.random()*4)]);
+            setTimeout(()=>{currentSentence2=[];render();},1500);
+        }
+    }
+}
+
+// LEVEL 3
+function renderLevel3(area){
+    const d = level3Data[questionIdx];
+    area.innerHTML=`
+        <div class="game-title">📖 קראו והשיבו</div>
+        <div class="story-box"><div class="story-text sentence" id="storyText">${d.story.split(' ').map(w=>`<span class="word" onclick="speakWord('${w.replace(/[^a-zA-Z]/g,'')}')">${w}</span>`).join(' ')}</div></div>
+        <button class="translate-btn" onclick="this.nextElementSibling.style.display='block';this.style.display='none'">📝 תרגום לעברית</button>
+        <div style="display:none;text-align:center;color:#666;font-size:0.85em;margin:6px 0">${d.storyHeb}</div>
+        <div style="font-family:'Fredoka One',cursive;text-align:center;margin:10px 0;direction:ltr" class="sentence" id="questionText">${d.question.split(' ').map(w=>`<span class="word" onclick="speakWord('${w.replace(/[^a-zA-Z]/g,'')}')">${w}</span>`).join(' ')}</div>
+        <div class="options">${d.options.map((o,i)=>`<button class="option-btn" onclick="checkAnswer3(this,${i},${d.answer})">${o}</button>`).join('')}</div>
+        <div class="feedback" id="fb"></div>
+        <div class="progress">${questionIdx+1} / ${level3Data.length}</div>`;
+    lastReplayText = d.story; lastReplayElId = 'storyText';
+    highlightSentence(d.story, 'storyText', ()=>{
+        highlightSentence(d.question, 'questionText');
+    });
+}
+
+function highlightSentence(text, elId, onEnd){
+    clearHighlightTimers();
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const rate = slowMode ? 0.6 : 1.0;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang='en-US'; u.rate = rate; u.pitch=1.1;
+    if(onEnd) u.onend = onEnd;
+
+    const words = document.querySelectorAll(`#${elId} .word`);
+
+    // תמיד הפעל טיימר כ-fallback לפלאפון
+    highlightByTimer(text, elId, rate);
+
+    // אם onboundary עובד (מחשב) - השתמש בו ובטל את הטיימר
+    let boundaryFired = false;
+    u.onboundary = (e)=>{
+        if(e.name !== 'word') return;
+        if(!boundaryFired){
+            boundaryFired = true;
+            clearHighlightTimers(); // onboundary עובד - בטל טיימרים
+        }
+        words.forEach(w=>w.classList.remove('highlight'));
+        let pos=0;
+        for(let w of words){
+            if(pos >= e.charIndex && pos < e.charIndex + (e.charLength||5) + 5){
+                w.classList.add('highlight'); break;
+            }
+            pos += w.textContent.length+1;
+        }
+    };
+
+    window.speechSynthesis.speak(u);
+}
+
+function checkAnswer3(btn, picked, correct){
+    document.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+    if(picked===correct){
+        btn.classList.add('correct');
+        document.getElementById('fb').innerHTML='<span class="success">!נכון, כל הכבוד ✅</span>';
+        speak(randomPraise());
+        addXPandCoins();
+        setTimeout(()=>{questionIdx++;render();},1500);
+    } else {
+        btn.classList.add('wrong');
+        document.getElementById('fb').innerHTML='<span class="error">לא בדיוק, נסו שוב</span>';
+        speak(['Not quite!','Try again!','Almost!','Oops!'][Math.floor(Math.random()*4)]);
+        setTimeout(()=>render(),1500);
+    }
+}
+
+// LEVEL 4
+function renderLevel4(area){
+    const d = level4Data[questionIdx % level4Data.length];
+    // Build paragraph with each word as a span for highlighting
+    let wordIdx = 0;
+    let paragraphHtml = '';
+    const parts = d.text.split(/(\[\w+\])/); // Split by blanks
+    parts.forEach(part=>{
+        const blankMatch = part.match(/^\[(\w+)\]$/);
+        if(blankMatch){
+            paragraphHtml += `<span class="blank empty" id="blank-${blankMatch[1]}" data-answer="${blankMatch[1]}">___</span> `;
+        } else {
+            // Wrap each word in a span
+            part.split(/\s+/).filter(w=>w).forEach(w=>{
+                paragraphHtml += `<span class="word" id="w4-${wordIdx}" onclick="speakWord('${w.replace(/[^a-zA-Z]/g,'')}')">${w}</span> `;
+                wordIdx++;
+            });
+        }
+    });
+    
+    const bankShuffled = [...d.bank].sort(()=>Math.random()-0.5);
+    area.innerHTML=`
+        <div class="game-title">✍️ השלימו את הסיפור</div>
+        <div class="paragraph sentence" id="level4Text" style="direction:ltr">${paragraphHtml}</div>
+        <div class="word-bank">${bankShuffled.map(w=>`<button class="bank-word" onclick="fillBlank4(this,'${w}')">${w}</button>`).join('')}</div>
+        <div class="feedback" id="fb"></div>
+        <div class="progress">${questionIdx+1} / ${level4Data.length}</div>`;
+    // Auto-read with highlighting - skip blanks
+    const readableText = d.text.replace(/\[(\w+)\]/g, '');
+    lastReplayText = readableText; lastReplayElId = 'level4Text';
+    highlightSentence(readableText, 'level4Text');
+}
+
+let filled4=[];
+function fillBlank4(btn, word){
+    const d = level4Data[questionIdx % level4Data.length];
+    const nextBlank = d.blanks.find(b=>!filled4.includes(b));
+    if(!nextBlank) return;
+    const blankEl = document.getElementById('blank-'+nextBlank);
+    if(word===nextBlank){
+        blankEl.textContent = word;
+        blankEl.classList.remove('empty');
+        btn.classList.add('used');
+        filled4.push(word);
+        speakWord(word);
+        if(filled4.length===d.blanks.length){
+            document.getElementById('fb').innerHTML='<span class="success">!מעולה, סיימתם את הסיפור ✅</span>';
+            addXPandCoins();addXPandCoins(); // Double reward for level 4
+            const fullText = d.text.replace(/\[(\w+)\]/g,'$1');
+            // Read the full completed sentence, then praise, then move on
+            speak(fullText, ()=>{
+                speak(randomPraise(), ()=>{
+                    setTimeout(()=>{filled4=[];questionIdx++;render();},1000);
+                });
+            });
+        }
+    } else {
+        btn.style.background='var(--accent)';
+        setTimeout(()=>btn.style.background='',400);
+    }
+}
+
+// Init
+updateCoinsDisplay();
+render();
+</script>
+</body>
+</html>
